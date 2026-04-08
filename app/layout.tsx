@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Spendrift",
-  description: "Privacy Policy for the Spendrift mobile application.",
+  title: "Spendrift",
+  description: "Your finances, on your device. Simple, private, and always in your control.",
 };
 
 export default function RootLayout({
