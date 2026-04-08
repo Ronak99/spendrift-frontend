@@ -70,16 +70,8 @@ const sections = [
     ],
   },
   {
-    id: "children",
-    number: 8,
-    title: "Children",
-    content: [
-      "The App is not directed at children under 13 (or the minimum age required in your region). We do not knowingly collect personal information from children.",
-    ],
-  },
-  {
     id: "changes",
-    number: 9,
+    number: 8,
     title: "Changes",
     content: [
       `We may update this Privacy Policy from time to time. The "Last updated" date at the top will change when we do. Continued use of the App after changes means you accept the updated policy.`,
@@ -87,10 +79,10 @@ const sections = [
   },
   {
     id: "contact",
-    number: 10,
+    number: 9,
     title: "Contact",
     content: [],
-    contactEmail: "punase.ronak99@gmail.com",
+    contactEmail: "me@ronakpunase.dev",
   },
 ];
 
