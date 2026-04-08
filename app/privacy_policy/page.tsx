@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Spendrift",
+  title: "Spendrift Privacy Policy",
   description: "Privacy Policy for the Spendrift mobile application.",
 };
 
