@@ -156,11 +156,11 @@ function PhoneFrame({ activeFeature }: { activeFeature: number }) {
   const feature = FEATURES[activeFeature];
 
   return (
-    <div className="relative" style={{ width: 315, height: 684 }}>
+    <div className="relative" style={{ width: 340, height: 720 }}>
       {/* Glow behind phone */}
       <motion.div
         className="absolute inset-0 rounded-[52px] blur-3xl"
-        style={{ background: feature.glow, margin: '-20px' }}
+        style={{ background: feature.glow, margin: '-30px' }}
         animate={{ background: feature.glow }}
         transition={{ duration: 0.8 }}
       />
@@ -169,8 +169,8 @@ function PhoneFrame({ activeFeature }: { activeFeature: number }) {
       <div
         className="relative rounded-[52px] overflow-hidden"
         style={{
-          width: 315,
-          height: 684,
+          width: 340,
+          height: 720,
           background: 'var(--phone-bg)',
           border: '1.5px solid rgba(255,255,255,0.12)',
           boxShadow: `0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)`,
@@ -432,7 +432,7 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.div
-                className="absolute -right-24 bottom-1/3 hidden xl:block"
+                className="absolute -right-28 bottom-20 hidden xl:block"
                 animate={{ y: [0, 8, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
               >
@@ -440,7 +440,7 @@ export default function LandingPage() {
                   className="px-4 py-3 rounded-2xl text-sm font-semibold whitespace-nowrap"
                   style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 >
-                  🔒 100% Private
+                  🔒 On-Device Private
                 </div>
               </motion.div>
 
