@@ -131,44 +131,49 @@ function PhoneFrame({ activeFeature }: { activeFeature: number }) {
   );
 }
 
-function FeatureText({ feature, visible }: { feature: typeof FEATURES[0]; visible: boolean }) {
+function FeatureText({ feature }: { feature: typeof FEATURES[0] }) {
   return (
-    <AnimatePresence mode="wait">
-      {visible && (
-        <motion.div
-          key={feature.id}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 20 }}
-          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="space-y-5"
-        >
-          <div
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase"
-            style={{ background: `${feature.color}18`, color: feature.color, border: `1px solid ${feature.color}35` }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: feature.color }} />
-            {feature.tag}
-          </div>
+    <div className="space-y-5">
+      <div
+        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase"
+        style={{ background: `${feature.color}18`, color: feature.color, border: `1px solid ${feature.color}35` }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full" style={{ background: feature.color }} />
+        {feature.tag}
+      </div>
 
-          <h2
-            className="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.12] sm:leading-[1.1] tracking-tight"
-            style={{ color: 'var(--text-primary)', whiteSpace: 'pre-line' }}
-          >
-            {feature.headline}
-          </h2>
+      <h2
+        className="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.12] sm:leading-[1.1] tracking-tight"
+        style={{ color: 'var(--text-primary)', whiteSpace: 'pre-line' }}
+      >
+        {feature.headline}
+      </h2>
 
-          <p className="text-[0.9375rem] sm:text-base leading-relaxed max-w-sm" style={{ color: 'var(--text-secondary)' }}>
-            {feature.body}
-          </p>
+      <p className="text-[0.9375rem] sm:text-base leading-relaxed max-w-sm" style={{ color: 'var(--text-secondary)' }}>
+        {feature.body}
+      </p>
 
-          <div
-            className="h-0.5 w-16 rounded-full"
-            style={{ background: feature.color }}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
+      <div className="h-0.5 w-16 rounded-full" style={{ background: feature.color }} />
+    </div>
+  );
+}
+
+function AppStoreDownloadButton() {
+  return (
+    <a
+      href="#"
+      className="group inline-flex w-fit items-center gap-3 px-6 py-4 rounded-2xl font-semibold text-sm transition-opacity hover:opacity-90"
+      style={{
+        background: 'var(--text-primary)',
+        color: 'var(--bg)',
+        boxShadow: '0 8px 32px rgba(124,110,245,0.25)',
+      }}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+      </svg>
+      Download on the App Store
+    </a>
   );
 }
 
@@ -202,10 +207,10 @@ function ProgressDots({
   );
 }
 
-const SCROLL_PANEL_COUNT = 1 + FEATURES.length;
+const SCROLL_PANEL_COUNT = FEATURES.length;
 
 function phoneFeatureIndexForPanel(panel: number) {
-  return panel <= 0 ? 0 : panel - 1;
+  return Math.min(Math.max(0, panel), FEATURES.length - 1);
 }
 
 function getViewportHeight() {
@@ -295,8 +300,7 @@ export default function LandingPage() {
     window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
   };
 
-  const dotActiveColor =
-    activePanel === 0 ? FEATURES[0].color : FEATURES[activePanel - 1].color;
+  const dotActiveColor = FEATURES[activePanel].color;
 
   return (
     <div ref={containerRef} style={{ background: 'var(--bg)' }}>
@@ -362,82 +366,42 @@ export default function LandingPage() {
           </nav>
 
           <div className="relative z-10 flex-1 flex items-center min-h-0 overflow-y-auto overflow-x-hidden lg:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16 py-4 sm:py-8">
-              {/* Left: hero on panel 0, then feature copy */}
-              <div className="flex-1 max-w-lg space-y-5 sm:space-y-8 w-full min-w-0">
-                {activePanel === 0 ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.1 }}
-                  >
-                    <div
-                      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[0.6875rem] sm:text-xs font-semibold mb-5 sm:mb-8 max-w-full"
-                      style={{ background: 'rgba(124, 110, 245, 0.12)', color: '#7c6ef5', border: '1px solid rgba(124,110,245,0.25)' }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                      Now available on the App Store
-                    </div>
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 flex flex-col lg:flex-row lg:items-start items-stretch gap-8 sm:gap-12 lg:gap-16 py-4 sm:py-8">
+              {/* Left: feature copy + fixed CTA slot (same structure every panel — avoids phone jumping) */}
+              <div className="flex-1 max-w-lg w-full min-w-0 flex flex-col gap-6 sm:gap-8">
+                <motion.div
+                  key={activePanel}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+                >
+                  <FeatureText feature={FEATURES[activePanel]} />
+                </motion.div>
 
-                    <h1
-                      className="text-[2rem] leading-[1.08] min-[400px]:text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black sm:leading-[1.05] tracking-tight mb-4 sm:mb-6"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
-                      Your money,{' '}
-                      <span
-                        className="relative"
-                        style={{
-                          background: 'linear-gradient(135deg, #7c6ef5, #5ee7df)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                        }}
-                      >
-                        understood.
-                      </span>
-                    </h1>
+                <div className="shrink-0">
+                  <AppStoreDownloadButton />
+                </div>
 
-                    <p className="text-base sm:text-lg leading-relaxed mb-6 sm:mb-10" style={{ color: 'var(--text-secondary)' }}>
-                      Track expenses, set budgets, and reach your savings goals —
-                      all completely private and on your device.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-3 items-start">
-                      <a
-                        href="#"
-                        className="group inline-flex items-center gap-3 px-6 py-4 rounded-2xl font-semibold text-sm transition-all hover:scale-[1.02] hover:shadow-2xl"
-                        style={{
-                          background: 'var(--text-primary)',
-                          color: 'var(--bg)',
-                          boxShadow: '0 8px 32px rgba(124,110,245,0.25)',
-                        }}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                        </svg>
-                        Download on the App Store
-                      </a>
-                    </div>
-
-                    <div className="mt-6 sm:mt-10 flex flex-wrap items-center gap-4 sm:gap-6">
-                      <div>
-                        <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>4.9★</p>
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>App Store rating</p>
-                      </div>
-                      <div className="w-px h-10 hidden sm:block" style={{ background: 'var(--border)' }} />
-                      <div>
-                        <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>100%</p>
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>On-device private</p>
-                      </div>
-                      <div className="w-px h-10 hidden sm:block" style={{ background: 'var(--border)' }} />
-                      <div>
-                        <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>Free</p>
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>To download</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <FeatureText feature={FEATURES[activePanel - 1]} visible={true} />
-                )}
+                {/* Reserve height on all panels so stacked layout does not shift the phone when stats hide */}
+                <div
+                  className={`flex flex-wrap items-center gap-4 sm:gap-6 pt-1 ${activePanel === 0 ? '' : 'invisible pointer-events-none select-none'}`}
+                  aria-hidden={activePanel !== 0}
+                >
+                  <div>
+                    <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>4.9★</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>App Store rating</p>
+                  </div>
+                  <div className="w-px h-10 hidden sm:block" style={{ background: 'var(--border)' }} />
+                  <div>
+                    <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>100%</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>On-device private</p>
+                  </div>
+                  <div className="w-px h-10 hidden sm:block" style={{ background: 'var(--border)' }} />
+                  <div>
+                    <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>Free</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>To download</p>
+                  </div>
+                </div>
 
                 <ProgressDots
                   total={SCROLL_PANEL_COUNT}
@@ -447,13 +411,8 @@ export default function LandingPage() {
                 />
               </div>
 
-              {/* Right: phone */}
-              <motion.div
-                className="flex-shrink-0 relative w-full flex justify-center lg:w-auto lg:block"
-                initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.9, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-              >
+              {/* Right: phone — top-aligned with copy so flex centering does not shift between panels */}
+              <div className="flex-shrink-0 relative w-full flex justify-center lg:justify-end lg:pt-0 self-center lg:self-start">
                 {activePanel === 0 && (
                   <>
                     <motion.div
@@ -485,27 +444,29 @@ export default function LandingPage() {
                 )}
 
                 <PhoneFrame activeFeature={phoneFeatureIndex} />
-              </motion.div>
+              </div>
             </div>
           </div>
 
-          {/* Scroll hint — only on first panel; scrolling advances panels immediately */}
-          {activePanel === 0 && (
-            <motion.div
-              className="relative z-10 flex flex-col items-center gap-1.5 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-8 shrink-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2, duration: 0.8 }}
-            >
-              <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>Scroll to explore</p>
+          {/* Fixed height so hiding the hint on panel 2+ does not shift the sticky layout / phone */}
+          <div className="relative z-10 min-h-[4.75rem] shrink-0 flex flex-col items-center justify-end pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-8">
+            {activePanel === 0 && (
               <motion.div
-                className="w-px h-10"
-                style={{ background: 'linear-gradient(to bottom, var(--border), transparent)' }}
-                animate={{ scaleY: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            </motion.div>
-          )}
+                className="flex flex-col items-center gap-1.5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.2, duration: 0.8 }}
+              >
+                <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>Scroll to explore</p>
+                <motion.div
+                  className="w-px h-10"
+                  style={{ background: 'linear-gradient(to bottom, var(--border), transparent)' }}
+                  animate={{ scaleY: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                />
+              </motion.div>
+            )}
+          </div>
 
           {/* Panel counter */}
           <div className="absolute top-16 sm:top-20 lg:top-24 right-4 sm:right-8 lg:right-16 text-right pointer-events-none">
