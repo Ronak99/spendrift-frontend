@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { FEATURE_VIDEO_SOURCES } from "@/lib/feature-videos";
+import VideoPrefetch from "./components/VideoPrefetch";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,7 +29,15 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        {FEATURE_VIDEO_SOURCES.map((href) => (
+          <link key={href} rel="preload" as="video" href={href} type="video/mp4" />
+        ))}
+      </head>
+      <body className="min-h-full flex flex-col">
+        <VideoPrefetch />
+        {children}
+      </body>
     </html>
   );
 }

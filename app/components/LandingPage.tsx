@@ -1,8 +1,9 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { FEATURE_VIDEO_SOURCES } from '@/lib/feature-videos';
 
 const FEATURES = [
   {
@@ -12,15 +13,6 @@ const FEATURES = [
     body: 'Spendrift learns your spending habits and automatically adjusts budget categories — so you always know where every dollar is going.',
     color: '#7c6ef5',
     glow: 'rgba(124, 110, 245, 0.18)',
-    screenBg: 'linear-gradient(160deg, #1e1b36 0%, #0f0e1a 100%)',
-    screenAccent: '#7c6ef5',
-    screenLabel: 'Monthly Budget',
-    screenData: [
-      { label: 'Food & Drink', pct: 72, color: '#7c6ef5' },
-      { label: 'Transport', pct: 45, color: '#5ee7df' },
-      { label: 'Entertainment', pct: 30, color: '#f59e0b' },
-      { label: 'Shopping', pct: 58, color: '#ec4899' },
-    ],
   },
   {
     id: 1,
@@ -29,15 +21,6 @@ const FEATURES = [
     body: 'Link your accounts or log manually. Spendrift categorises everything in real time, with beautiful charts that make your spending crystal clear.',
     color: '#5ee7df',
     glow: 'rgba(94, 231, 223, 0.18)',
-    screenBg: 'linear-gradient(160deg, #0e2424 0%, #080f0f 100%)',
-    screenAccent: '#5ee7df',
-    screenLabel: 'This Month',
-    screenData: [
-      { label: 'Groceries', pct: 65, color: '#5ee7df' },
-      { label: 'Uber', pct: 20, color: '#7c6ef5' },
-      { label: 'Netflix', pct: 12, color: '#ec4899' },
-      { label: 'Coffee', pct: 48, color: '#f59e0b' },
-    ],
   },
   {
     id: 2,
@@ -46,15 +29,6 @@ const FEATURES = [
     body: 'Create savings goals for anything — a vacation, new laptop, or emergency fund. Watch your progress grow with satisfying visual milestones.',
     color: '#f59e0b',
     glow: 'rgba(245, 158, 11, 0.18)',
-    screenBg: 'linear-gradient(160deg, #22190a 0%, #0f0c05 100%)',
-    screenAccent: '#f59e0b',
-    screenLabel: 'Savings Goals',
-    screenData: [
-      { label: 'New MacBook', pct: 78, color: '#f59e0b' },
-      { label: 'Japan Trip', pct: 42, color: '#5ee7df' },
-      { label: 'Emergency Fund', pct: 91, color: '#7c6ef5' },
-      { label: 'New Camera', pct: 25, color: '#ec4899' },
-    ],
   },
   {
     id: 3,
@@ -63,89 +37,49 @@ const FEATURES = [
     body: 'Beautiful weekly and monthly reports reveal patterns you never noticed. Get personalised tips to optimise your spending — all on-device, fully private.',
     color: '#ec4899',
     glow: 'rgba(236, 72, 153, 0.18)',
-    screenBg: 'linear-gradient(160deg, #220d16 0%, #0f060b 100%)',
-    screenAccent: '#ec4899',
-    screenLabel: 'Insights',
-    screenData: [
-      { label: 'Dining Out', pct: 55, color: '#ec4899' },
-      { label: 'Subscriptions', pct: 38, color: '#7c6ef5' },
-      { label: 'Impulse Buys', pct: 22, color: '#f59e0b' },
-      { label: 'Savings Rate', pct: 67, color: '#5ee7df' },
-    ],
   },
 ];
 
-function PhoneScreen({ feature, visible }: { feature: typeof FEATURES[0]; visible: boolean }) {
+function AppScreenVideo({ featureId, visible }: { featureId: number; visible: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const src = FEATURE_VIDEO_SOURCES[featureId];
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (visible) {
+      el.play().catch(() => {});
+    } else {
+      el.pause();
+    }
+  }, [visible]);
+
   return (
     <AnimatePresence mode="wait">
       {visible && (
         <motion.div
-          key={feature.id}
+          key={featureId}
           initial={{ opacity: 0, y: 24, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -24, scale: 0.97 }}
           transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="absolute inset-0 rounded-[inherit] overflow-hidden"
-          style={{ background: feature.screenBg }}
+          className="absolute inset-0 rounded-[inherit] overflow-hidden bg-black"
         >
-          {/* Status bar */}
-          <div className="flex justify-between items-center px-6 pt-14 pb-2">
-            <span className="text-xs font-medium opacity-50" style={{ color: feature.screenAccent }}>9:41</span>
-            <div className="flex gap-1.5 items-center opacity-50">
-              <div className="w-4 h-2 rounded-sm border" style={{ borderColor: feature.screenAccent }} />
-              <div className="w-3 h-3 rounded-full border" style={{ borderColor: feature.screenAccent }} />
-              <div className="w-3.5 h-2.5" style={{ color: feature.screenAccent }}>
-                <svg viewBox="0 0 14 10" fill="currentColor"><path d="M0 3.5C2 1.5 5 0 7 0s5 1.5 7 3.5l-2 2C10.5 4 8.5 3 7 3s-3.5 1-5 2.5L0 3.5z"/><circle cx="7" cy="8" r="1.5"/></svg>
-              </div>
-            </div>
-          </div>
-
-          {/* App header */}
-          <div className="px-6 pb-4">
-            <p className="text-xs opacity-50 mb-0.5" style={{ color: feature.screenAccent }}>💸 Spendrift</p>
-            <h3 className="text-2xl font-bold text-white">{feature.screenLabel}</h3>
-          </div>
-
-          {/* Big stat */}
-          <div className="mx-6 mb-5 rounded-2xl p-5" style={{ background: `${feature.screenAccent}18`, border: `1px solid ${feature.screenAccent}30` }}>
-            <p className="text-xs mb-1 opacity-60 text-white">Total Tracked</p>
-            <p className="text-4xl font-black text-white">$4,820<span className="text-lg opacity-50">.00</span></p>
-            <p className="text-xs mt-1" style={{ color: feature.screenAccent }}>↑ 12% from last month</p>
-          </div>
-
-          {/* Bar chart */}
-          <div className="px-6 space-y-3">
-            {feature.screenData.map((row) => (
-              <div key={row.label}>
-                <div className="flex justify-between text-xs text-white mb-1">
-                  <span className="opacity-70">{row.label}</span>
-                  <span className="opacity-50">{row.pct}%</span>
-                </div>
-                <div className="h-2 rounded-full" style={{ background: `${row.color}20` }}>
-                  <motion.div
-                    className="h-2 rounded-full"
-                    style={{ background: row.color }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${row.pct}%` }}
-                    transition={{ duration: 0.9, delay: 0.2, ease: 'easeOut' }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Bottom nav */}
-          <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-8 px-10">
-            {['◎', '◈', '◉', '◧'].map((icon, i) => (
-              <div
-                key={i}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
-                style={i === 2 ? { background: feature.screenAccent, color: '#000' } : { color: feature.screenAccent, opacity: 0.4 }}
-              >
-                {icon}
-              </div>
-            ))}
-          </div>
+          <video
+            ref={ref}
+            className="chromeless-marketing-video absolute inset-0 h-full w-full"
+            src={src}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            controls={false}
+            controlsList="nodownload nofullscreen noremoteplayback"
+            disablePictureInPicture
+            disableRemotePlayback
+            aria-label="App screen recording preview"
+          />
         </motion.div>
       )}
     </AnimatePresence>
@@ -182,7 +116,7 @@ function PhoneFrame({ activeFeature }: { activeFeature: number }) {
         {/* Screen area */}
         <div className="absolute inset-0 rounded-[52px] overflow-hidden">
           {FEATURES.map((f) => (
-            <PhoneScreen key={f.id} feature={f} visible={f.id === activeFeature} />
+            <AppScreenVideo key={f.id} featureId={f.id} visible={f.id === activeFeature} />
           ))}
         </div>
 

@@ -46,3 +46,18 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* Chromeless marketing videos: no timeline, opaque fill */
+.chromeless-marketing-video {
+  background-color: #000;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.chromeless-marketing-video::-webkit-media-controls {
+  display: none !important;
+}
+
+.chromeless-marketing-video::-webkit-media-controls-enclosure {
+  display: none !important;
+}
