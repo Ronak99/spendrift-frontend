@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Spendrift Privacy Policy",
@@ -91,13 +92,13 @@ export default function PrivacyPolicy() {
     <main className="min-h-screen py-12 px-5 pb-20" style={{ backgroundColor: "var(--bg)" }}>
       <div className="max-w-2xl mx-auto">
         <header className="mb-12 pb-8" style={{ borderBottom: "1px solid var(--border)" }}>
-          <a
+          <Link
             href="/"
             className="inline-block text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-5 no-underline"
             style={{ color: "var(--accent)", backgroundColor: "var(--accent-light)" }}
           >
             ← Spendrift
-          </a>
+          </Link>
           <h1 className="text-4xl font-bold tracking-tight leading-tight mb-3" style={{ color: "var(--text-primary)" }}>
             Privacy Policy
           </h1>

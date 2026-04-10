@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, AnimatePresence } from 'framer-motion';
+import { useRef, useEffect, useLayoutEffect, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { FEATURE_VIDEO_SOURCES } from '@/lib/feature-videos';
 
@@ -206,36 +206,77 @@ function phoneFeatureIndexForPanel(panel: number) {
   return panel <= 0 ? 0 : panel - 1;
 }
 
+/** Matches Framer offset ["start start", "end end"]: 0 when section top hits viewport top, 1 when section bottom hits viewport bottom. */
+function getStoryScrollMetrics(el: HTMLElement) {
+  const rect = el.getBoundingClientRect();
+  const scrollY = window.scrollY;
+  const elTopDoc = rect.top + scrollY;
+  const elHeight = el.offsetHeight;
+  const vh = window.innerHeight;
+  const track = elHeight - vh;
+  return { elTopDoc, track };
+}
+
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const [activePanel, setActivePanel] = useState(0);
 
-  const { scrollYProgress } = useScroll({
-    target: featuresRef,
-    offset: ['start start', 'end end'],
-  });
+  const syncPanelFromScroll = useCallback(() => {
+    const el = featuresRef.current;
+    if (!el) return;
+    const { elTopDoc, track } = getStoryScrollMetrics(el);
+    if (track <= 0) {
+      setActivePanel(0);
+      return;
+    }
+    const raw = (window.scrollY - elTopDoc) / track;
+    const progress = Math.min(1, Math.max(0, raw));
+    const index = Math.min(
+      Math.floor(progress * SCROLL_PANEL_COUNT),
+      SCROLL_PANEL_COUNT - 1
+    );
+    setActivePanel(index);
+  }, []);
 
-  useEffect(() => {
-    const unsub = scrollYProgress.on('change', (v) => {
-      const index = Math.min(
-        Math.floor(v * SCROLL_PANEL_COUNT),
-        SCROLL_PANEL_COUNT - 1
-      );
-      setActivePanel(index < 0 ? 0 : index);
-    });
-    return unsub;
-  }, [scrollYProgress]);
+  useLayoutEffect(() => {
+    const el = featuresRef.current;
+    if (!el) return;
+
+    let raf = 0;
+    const schedule = () => {
+      if (raf !== 0) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        syncPanelFromScroll();
+      });
+    };
+
+    schedule();
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    const ro = new ResizeObserver(schedule);
+    ro.observe(el);
+
+    return () => {
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      ro.disconnect();
+      if (raf !== 0) cancelAnimationFrame(raf);
+    };
+  }, [syncPanelFromScroll]);
 
   const phoneFeatureIndex = phoneFeatureIndexForPanel(activePanel);
   const featureForGlow = FEATURES[phoneFeatureIndex];
 
   const scrollToPanel = (panelIndex: number) => {
-    if (!featuresRef.current) return;
     const el = featuresRef.current;
+    if (!el) return;
+    const { elTopDoc, track } = getStoryScrollMetrics(el);
     const clamped = Math.max(0, Math.min(panelIndex, SCROLL_PANEL_COUNT - 1));
-    const targetScroll = el.offsetTop + (clamped / SCROLL_PANEL_COUNT) * el.offsetHeight;
-    window.scrollTo({ top: targetScroll + 10, behavior: 'smooth' });
+    const targetScroll = elTopDoc + (clamped / SCROLL_PANEL_COUNT) * Math.max(0, track);
+    window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
   };
 
   const dotActiveColor =
