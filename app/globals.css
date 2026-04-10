@@ -61,3 +61,43 @@ body {
 .chromeless-marketing-video::-webkit-media-controls-enclosure {
   display: none !important;
 }
+
+/* Landing phone: scaled visual fits slot; inner uses transform (layout box stays 340×720 otherwise). */
+.landing-phone-slot {
+  --landing-phone-scale: min(
+    1,
+    calc((100vw - 2rem) / 340),
+    calc((100dvh - 13.5rem) / 720)
+  );
+  position: relative;
+  width: calc(340px * var(--landing-phone-scale));
+  height: calc(720px * var(--landing-phone-scale));
+  margin-inline: auto;
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .landing-phone-slot {
+    --landing-phone-scale: 1;
+    width: auto;
+    height: auto;
+  }
+}
+
+.landing-phone-inner {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 340px;
+  height: 720px;
+  transform: translateX(-50%) scale(var(--landing-phone-scale));
+  transform-origin: top center;
+}
+
+@media (min-width: 1024px) {
+  .landing-phone-inner {
+    position: relative;
+    left: auto;
+    transform: none;
+  }
+}
