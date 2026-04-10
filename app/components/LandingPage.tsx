@@ -90,7 +90,8 @@ function PhoneFrame({ activeFeature }: { activeFeature: number }) {
   const feature = FEATURES[activeFeature];
 
   return (
-    <div className="relative" style={{ width: 340, height: 720 }}>
+    <div className="landing-phone-slot">
+      <div className="landing-phone-inner relative">
       {/* Glow behind phone */}
       <motion.div
         className="absolute inset-0 rounded-[52px] blur-3xl"
@@ -125,6 +126,7 @@ function PhoneFrame({ activeFeature }: { activeFeature: number }) {
         <div className="absolute left-0 top-24 w-1 h-10 rounded-r-full" style={{ background: 'rgba(255,255,255,0.08)' }} />
         <div className="absolute left-0 top-40 w-1 h-10 rounded-r-full" style={{ background: 'rgba(255,255,255,0.08)' }} />
       </div>
+      </div>
     </div>
   );
 }
@@ -150,13 +152,13 @@ function FeatureText({ feature, visible }: { feature: typeof FEATURES[0]; visibl
           </div>
 
           <h2
-            className="text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight"
+            className="text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.12] sm:leading-[1.1] tracking-tight"
             style={{ color: 'var(--text-primary)', whiteSpace: 'pre-line' }}
           >
             {feature.headline}
           </h2>
 
-          <p className="text-base leading-relaxed max-w-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-[0.9375rem] sm:text-base leading-relaxed max-w-sm" style={{ color: 'var(--text-secondary)' }}>
             {feature.body}
           </p>
 
@@ -206,13 +208,18 @@ function phoneFeatureIndexForPanel(panel: number) {
   return panel <= 0 ? 0 : panel - 1;
 }
 
+function getViewportHeight() {
+  if (typeof window === 'undefined') return 0;
+  return window.visualViewport?.height ?? window.innerHeight;
+}
+
 /** Matches Framer offset ["start start", "end end"]: 0 when section top hits viewport top, 1 when section bottom hits viewport bottom. */
 function getStoryScrollMetrics(el: HTMLElement) {
   const rect = el.getBoundingClientRect();
   const scrollY = window.scrollY;
   const elTopDoc = rect.top + scrollY;
   const elHeight = el.offsetHeight;
-  const vh = window.innerHeight;
+  const vh = getViewportHeight();
   const track = elHeight - vh;
   return { elTopDoc, track };
 }
@@ -256,12 +263,21 @@ export default function LandingPage() {
 
     window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
+    const vv = window.visualViewport;
+    if (vv) {
+      vv.addEventListener('resize', schedule);
+      vv.addEventListener('scroll', schedule);
+    }
     const ro = new ResizeObserver(schedule);
     ro.observe(el);
 
     return () => {
       window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', schedule);
+      if (vv) {
+        vv.removeEventListener('resize', schedule);
+        vv.removeEventListener('scroll', schedule);
+      }
       ro.disconnect();
       if (raf !== 0) cancelAnimationFrame(raf);
     };
@@ -287,10 +303,10 @@ export default function LandingPage() {
       {/* Hero + feature story: scroll progress starts at first viewport (panel 0). */}
       <section
         ref={featuresRef}
-        style={{ height: `${SCROLL_PANEL_COUNT * 100}vh` }}
+        style={{ height: `${SCROLL_PANEL_COUNT * 100}dvh` }}
         className="relative"
       >
-        <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
+        <div className="sticky top-0 min-h-[100dvh] h-[100dvh] flex flex-col overflow-hidden">
           {/* Noise texture overlay */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.03]"
@@ -320,24 +336,24 @@ export default function LandingPage() {
           />
 
           {/* Nav */}
-          <nav className="relative z-10 flex items-center justify-between px-8 py-6 lg:px-16 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl">💸</span>
-              <span className="text-xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
+          <nav className="relative z-10 flex items-center justify-between gap-3 px-4 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-4 sm:px-8 sm:py-6 lg:px-16 shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xl sm:text-2xl shrink-0">💸</span>
+              <span className="text-lg sm:text-xl font-black tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
                 Spendrift
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-3 shrink-0">
               <Link
                 href="/privacy_policy"
-                className="text-sm px-4 py-2 rounded-lg transition-opacity hover:opacity-60"
+                className="text-xs sm:text-sm px-2.5 py-2 sm:px-4 rounded-lg transition-opacity hover:opacity-60"
                 style={{ color: 'var(--text-secondary)' }}
               >
                 Privacy
               </Link>
               <a
                 href="mailto:punase.ronak99@gmail.com"
-                className="text-sm px-4 py-2 rounded-lg transition-opacity hover:opacity-60"
+                className="text-xs sm:text-sm px-2.5 py-2 sm:px-4 rounded-lg transition-opacity hover:opacity-60"
                 style={{ color: 'var(--text-secondary)' }}
               >
                 Contact
@@ -345,10 +361,10 @@ export default function LandingPage() {
             </div>
           </nav>
 
-          <div className="relative z-10 flex-1 flex items-center min-h-0">
-            <div className="w-full max-w-7xl mx-auto px-8 lg:px-16 flex flex-col lg:flex-row items-center gap-16 py-8">
+          <div className="relative z-10 flex-1 flex items-center min-h-0 overflow-y-auto overflow-x-hidden lg:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16 py-4 sm:py-8">
               {/* Left: hero on panel 0, then feature copy */}
-              <div className="flex-1 max-w-lg space-y-8 w-full">
+              <div className="flex-1 max-w-lg space-y-5 sm:space-y-8 w-full min-w-0">
                 {activePanel === 0 ? (
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -356,7 +372,7 @@ export default function LandingPage() {
                     transition={{ duration: 0.7, delay: 0.1 }}
                   >
                     <div
-                      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-8"
+                      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[0.6875rem] sm:text-xs font-semibold mb-5 sm:mb-8 max-w-full"
                       style={{ background: 'rgba(124, 110, 245, 0.12)', color: '#7c6ef5', border: '1px solid rgba(124,110,245,0.25)' }}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
@@ -364,7 +380,7 @@ export default function LandingPage() {
                     </div>
 
                     <h1
-                      className="text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.05] tracking-tight mb-6"
+                      className="text-[2rem] leading-[1.08] min-[400px]:text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black sm:leading-[1.05] tracking-tight mb-4 sm:mb-6"
                       style={{ color: 'var(--text-primary)' }}
                     >
                       Your money,{' '}
@@ -380,7 +396,7 @@ export default function LandingPage() {
                       </span>
                     </h1>
 
-                    <p className="text-lg leading-relaxed mb-10" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-base sm:text-lg leading-relaxed mb-6 sm:mb-10" style={{ color: 'var(--text-secondary)' }}>
                       Track expenses, set budgets, and reach your savings goals —
                       all completely private and on your device.
                     </p>
@@ -402,7 +418,7 @@ export default function LandingPage() {
                       </a>
                     </div>
 
-                    <div className="mt-10 flex flex-wrap items-center gap-6">
+                    <div className="mt-6 sm:mt-10 flex flex-wrap items-center gap-4 sm:gap-6">
                       <div>
                         <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>4.9★</p>
                         <p className="text-xs" style={{ color: 'var(--text-muted)' }}>App Store rating</p>
@@ -433,7 +449,7 @@ export default function LandingPage() {
 
               {/* Right: phone */}
               <motion.div
-                className="flex-shrink-0 relative"
+                className="flex-shrink-0 relative w-full flex justify-center lg:w-auto lg:block"
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.9, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -476,7 +492,7 @@ export default function LandingPage() {
           {/* Scroll hint — only on first panel; scrolling advances panels immediately */}
           {activePanel === 0 && (
             <motion.div
-              className="relative z-10 flex flex-col items-center gap-2 pb-8 shrink-0"
+              className="relative z-10 flex flex-col items-center gap-1.5 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:pb-8 shrink-0"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2, duration: 0.8 }}
@@ -492,14 +508,14 @@ export default function LandingPage() {
           )}
 
           {/* Panel counter */}
-          <div className="absolute top-20 lg:top-24 right-8 lg:right-16 text-right pointer-events-none">
+          <div className="absolute top-16 sm:top-20 lg:top-24 right-4 sm:right-8 lg:right-16 text-right pointer-events-none">
             <AnimatePresence mode="wait">
               <motion.p
                 key={activePanel}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="text-5xl font-black opacity-10"
+                className="text-3xl sm:text-5xl font-black opacity-10"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {activePanel < 9 ? `0${activePanel + 1}` : activePanel + 1}
@@ -513,22 +529,22 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA SECTION ── */}
-      <section className="relative py-40 overflow-hidden">
+      <section className="relative py-20 sm:py-32 lg:py-40 overflow-hidden px-2">
         <div
           className="pointer-events-none absolute inset-0 opacity-20"
           style={{ background: 'radial-gradient(ellipse at 50% 50%, #7c6ef5 0%, transparent 60%)' }}
         />
 
-        <div className="relative z-10 max-w-3xl mx-auto px-8 text-center">
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
+            viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7 }}
           >
-            <div className="text-5xl mb-6">💸</div>
+            <div className="text-4xl sm:text-5xl mb-4 sm:mb-6">💸</div>
             <h2
-              className="text-4xl lg:text-6xl font-black leading-tight tracking-tight mb-6"
+              className="text-[1.75rem] min-[400px]:text-3xl sm:text-4xl lg:text-6xl font-black leading-tight tracking-tight mb-4 sm:mb-6"
               style={{ color: 'var(--text-primary)' }}
             >
               Take control of your
@@ -544,13 +560,13 @@ export default function LandingPage() {
               </span>
             </h2>
 
-            <p className="text-lg mb-10 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-base sm:text-lg mb-8 sm:mb-10 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               Join thousands of people already using Spendrift to build better money habits.
             </p>
 
             <a
               href="#"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-base transition-all hover:scale-[1.03]"
+              className="inline-flex items-center justify-center gap-2.5 sm:gap-3 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-semibold text-sm sm:text-base max-w-full transition-all hover:scale-[1.03]"
               style={{
                 background: 'var(--text-primary)',
                 color: 'var(--bg)',
@@ -572,15 +588,15 @@ export default function LandingPage() {
 
       {/* ── FOOTER ── */}
       <footer
-        className="border-t py-10 px-8 lg:px-16"
+        className="border-t py-8 sm:py-10 px-4 sm:px-8 lg:px-16"
         style={{ borderColor: 'var(--border)' }}
       >
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4 text-center sm:text-left">
           <div className="flex items-center gap-2">
             <span className="text-lg">💸</span>
             <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Spendrift</span>
           </div>
-          <div className="flex items-center gap-6 text-sm" style={{ color: 'var(--text-muted)' }}>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm" style={{ color: 'var(--text-muted)' }}>
             <Link href="/privacy_policy" className="hover:opacity-70 transition-opacity">
               Privacy Policy
             </Link>
