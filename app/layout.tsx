@@ -18,7 +18,8 @@ export const metadata: Metadata = {
   title: "Spendrift",
   description: "Your finances, on your device. Simple, private, and always in your control.",
   icons: {
-    icon: "/favicon.ico",
+    icon: [{ url: "/favicon.ico", type: "image/x-icon", sizes: "any" }],
+    shortcut: "/favicon.ico",
   },
 };
 
