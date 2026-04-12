@@ -280,36 +280,6 @@ function FeatureText({ feature, visible }: { feature: typeof FEATURES[0]; visibl
   );
 }
 
-function ProgressDots({
-  total,
-  active,
-  activeColor,
-  onChange,
-}: {
-  total: number;
-  active: number;
-  activeColor: string;
-  onChange: (i: number) => void;
-}) {
-  return (
-    <div className="flex gap-2.5 items-center">
-      {Array.from({ length: total }).map((_, i) => (
-        <button
-          key={i}
-          onClick={() => onChange(i)}
-          className="rounded-full transition-all duration-300"
-          style={{
-            width: i === active ? 24 : 8,
-            height: 8,
-            background: i === active ? activeColor : 'var(--border)',
-          }}
-          aria-label={`Go to section ${i + 1}`}
-        />
-      ))}
-    </div>
-  );
-}
-
 const SCROLL_PANEL_COUNT = 1 + FEATURES.length;
 
 /** Video slot: panel 0 → first clip, panel 1 → second, … clamped to last entry in FEATURE_VIDEO_SOURCES (can exceed FEATURES.length − 1). */
@@ -466,25 +436,96 @@ export default function LandingPage() {
     [heroAmbient.page.transition, heroAmbientIntroDelaySec]
   );
 
-  const scrollToPanel = (panelIndex: number) => {
-    const el = featuresRef.current;
-    if (!el) return;
-    const { elTopDoc, track } = getStoryScrollMetrics(el);
-    const clamped = Math.max(0, Math.min(panelIndex, SCROLL_PANEL_COUNT - 1));
-    const targetScroll = elTopDoc + (clamped / SCROLL_PANEL_COUNT) * Math.max(0, track);
-    window.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
-  };
-
-  const dotActiveColor =
-    activePanel === 0 ? FEATURES[0].color : FEATURES[activePanel - 1].color;
-
   return (
     <div ref={containerRef} style={{ background: 'var(--bg)' }}>
-      {/* Hero + feature story: scroll progress starts at first viewport (panel 0). */}
+      {/* Mobile: single screen, no scroll story or top nav */}
+      <div className="relative flex min-h-[100dvh] flex-col lg:hidden">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+          }}
+        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="absolute rounded-full blur-[100px] opacity-15"
+            style={{ width: 280, height: 280, top: -60, left: '50%', transform: 'translateX(-50%)', background: '#7c6ef5' }}
+          />
+          <div
+            className="absolute rounded-full blur-[90px] opacity-12"
+            style={{ width: 220, height: 220, bottom: 80, right: -40, background: '#5ee7df' }}
+          />
+        </div>
+
+        <main className="relative z-10 flex flex-1 flex-col items-center px-6 pt-12 pb-6 text-center">
+          <SpendriftLogoMark className="h-16 w-auto sm:h-20" />
+
+          <h1
+            className="mt-8 max-w-md text-3xl font-black leading-[1.12] tracking-tight sm:text-4xl"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            Your money,{' '}
+            <span
+              className="relative"
+              style={{
+                background: 'linear-gradient(135deg, #7c6ef5, #5ee7df)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              understood.
+            </span>
+          </h1>
+
+          <div className="mt-10">
+            <AppStoreDownloadBadge size="md" className="mx-auto" />
+          </div>
+
+          <div className="mt-8 flex flex-col items-center gap-1">
+            <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
+              4.9<span className="text-lg">★</span>
+            </p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              App Store rating
+            </p>
+          </div>
+        </main>
+
+        <footer
+          className="relative z-10 mt-auto border-t px-6 py-8"
+          style={{ borderColor: 'var(--border)' }}
+        >
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
+            <Link
+              href="/privacy_policy"
+              className="transition-opacity hover:opacity-70"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Privacy
+            </Link>
+            <a
+              href="mailto:me@ronakpunase.dev"
+              className="transition-opacity hover:opacity-70"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              Contact
+            </a>
+          </nav>
+          <p
+            className="mt-4 text-center text-xs tracking-wide"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            Built by Ronak
+          </p>
+        </footer>
+      </div>
+
+      {/* Desktop: hero + scroll-driven feature story */}
       <section
         ref={featuresRef}
         style={{ height: `${SCROLL_PANEL_COUNT * 100}vh` }}
-        className="relative"
+        className="relative hidden lg:block"
       >
         <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
           {/* Noise texture overlay */}
@@ -529,7 +570,7 @@ export default function LandingPage() {
             }
           />
 
-          <nav className="relative z-10 flex items-center justify-between gap-3 px-5 py-4 sm:px-8 sm:py-5 lg:px-16 lg:py-6 shrink-0">
+          <nav className="relative z-10 hidden shrink-0 items-center justify-between gap-3 px-5 py-4 sm:px-8 sm:py-5 lg:flex lg:px-16 lg:py-6">
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink">
               <SpendriftLogoMark className="h-7 w-auto sm:h-8 lg:h-9" />
               <span className="text-lg sm:text-xl font-black tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
@@ -628,15 +669,6 @@ export default function LandingPage() {
                 ) : (
                   <FeatureText feature={FEATURES[activePanel - 1]} visible={true} />
                 )}
-
-                {/* <div className="hidden lg:block">
-                  <ProgressDots
-                    total={SCROLL_PANEL_COUNT}
-                    active={activePanel}
-                    activeColor={dotActiveColor}
-                    onChange={scrollToPanel}
-                  />
-                </div> */}
               </div>
 
               {/* Right: phone */}
@@ -755,7 +787,7 @@ export default function LandingPage() {
       </section>
 
       <footer
-        className="fixed bottom-0 left-0 right-0 z-30 px-6 pb-8 pt-4 text-center pointer-events-none"
+        className="pointer-events-none fixed bottom-0 left-0 right-0 z-30 hidden px-6 pb-8 pt-4 text-center lg:block"
         style={{ opacity: footerOpacity }}
         aria-hidden={footerOpacity < 0.03}
       >
