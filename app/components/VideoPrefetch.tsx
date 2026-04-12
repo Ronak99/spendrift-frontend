@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { FEATURE_VIDEO_SOURCES } from '@/lib/feature-videos';
+import { FEATURE_VIDEO_SOURCES } from '@/lib/marketing-video-urls';
 
 /**
  * Warms the browser media cache for all feature videos as soon as the app loads.

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { FEATURE_VIDEO_SOURCES } from "@/lib/feature-videos";
+import { FEATURE_VIDEO_SOURCES } from "@/lib/marketing-video-urls";
 import VideoPrefetch from "./components/VideoPrefetch";
 import "./globals.css";
 
@@ -34,7 +34,7 @@ export default function RootLayout({
     >
       <head>
         {FEATURE_VIDEO_SOURCES.map((href) => (
-          <link key={href} rel="preload" as="video" href={href} type="video/mp4" />
+          <link key={href} rel="preload" as="video" href={href} />
         ))}
       </head>
       <body className="min-h-full flex flex-col">

@@ -3,7 +3,7 @@
 import { useRef, useEffect, useLayoutEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { FEATURE_VIDEO_SOURCES } from '@/lib/feature-videos';
+import { FEATURE_VIDEO_SOURCES } from '@/lib/marketing-video-urls';
 import {
   HERO_AMBIENT_CYCLE_CONFIG,
   heroAmbientMotionFromConfig,
@@ -163,7 +163,7 @@ function PhoneFrame({
         {/* Notch */}
         <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-7 rounded-full z-10" style={{ background: '#000' }} />
 
-        {/* Screen area — index into FEATURE_VIDEO_SOURCES, not FEATURES ids */}
+        {/* Screen area — `videoFeatureId` indexes FEATURE_VIDEO_SOURCES (7 clips vs 6 feature slides). */}
         <div className="absolute inset-0 rounded-[52px] overflow-hidden">
           <AppScreenVideo key={videoFeatureId} featureId={videoFeatureId} visible />
         </div>
