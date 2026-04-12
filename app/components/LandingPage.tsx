@@ -1,42 +1,65 @@
 'use client';
 
-import { useRef, useEffect, useLayoutEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useLayoutEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { FEATURE_VIDEO_SOURCES } from '@/lib/feature-videos';
+import {
+  HERO_AMBIENT_CYCLE_CONFIG,
+  heroAmbientMotionFromConfig,
+  type HeroAmbientMotion,
+} from '@/lib/hero-ambient-cycle';
+import { SpendriftLogoMark } from './SpendriftLogoMark';
+import { AppStoreDownloadBadge } from './AppStoreDownloadBadge';
 
 const FEATURES = [
   {
     id: 0,
     tag: 'Smart Budgeting',
-    headline: 'Set budgets that actually\nwork for you.',
-    body: 'Spendrift learns your spending habits and automatically adjusts budget categories — so you always know where every dollar is going.',
-    color: '#7c6ef5',
-    glow: 'rgba(124, 110, 245, 0.18)',
+    headline: 'Create transactions with ease.',
+    body: 'Type out your transactions with ease and save it forever.',
+    color: '#A78BFA', // Purple
+    glow: 'rgba(167, 139, 250, 0.18)',
   },
   {
     id: 1,
     tag: 'Expense Tracking',
-    headline: 'Every transaction,\ninstantly captured.',
-    body: 'Link your accounts or log manually. Spendrift categorises everything in real time, with beautiful charts that make your spending crystal clear.',
-    color: '#5ee7df',
-    glow: 'rgba(94, 231, 223, 0.18)',
+    headline: 'Top Tier Accessibility.',
+    body: 'Add accessibility shortcuts to your action button or double/triple tap that make your life easier.',
+    color: '#22D3EE', // Cyan
+    glow: 'rgba(34, 211, 238, 0.18)',
   },
   {
     id: 2,
     tag: 'Savings Goals',
-    headline: 'Reach your goals\nfaster than ever.',
-    body: 'Create savings goals for anything — a vacation, new laptop, or emergency fund. Watch your progress grow with satisfying visual milestones.',
-    color: '#f59e0b',
+    headline: 'Type Expense Shortcut.',
+    body: 'Record expense without ever opening your app.',
+    color: '#F59E0B', // Orange
     glow: 'rgba(245, 158, 11, 0.18)',
   },
   {
     id: 3,
     tag: 'Insights & Reports',
-    headline: 'Understand your money\nat a glance.',
-    body: 'Beautiful weekly and monthly reports reveal patterns you never noticed. Get personalised tips to optimise your spending — all on-device, fully private.',
-    color: '#ec4899',
-    glow: 'rgba(236, 72, 153, 0.18)',
+    headline: 'Voice Expenses.',
+    body: 'Directly speak an expense via the voice expense shortcut or via the speak feature and have your expenses be recorded magically.',
+    color: '#ef4444', // Red
+    glow: 'rgba(239, 68, 68, 0.18)',
+  },
+  {
+    id: 4,
+    tag: 'Import Statements',
+    headline: 'Missed Several Expenses?',
+    body: 'Record everything by simply upload your bank statement.',
+    color: '#3B82F6', // Blue
+    glow: 'rgba(59, 130, 246, 0.18)',
+  },
+  {
+    id: 5,
+    tag: 'Analytics',
+    headline: 'Insightful and Beautiful',
+    body: 'Beautiful analytics UI that tells you everything about your app.',
+    color: '#14B8A6', // Teal
+    glow: 'rgba(20, 184, 166, 0.18)',
   },
 ];
 
@@ -48,7 +71,7 @@ function AppScreenVideo({ featureId, visible }: { featureId: number; visible: bo
     const el = ref.current;
     if (!el) return;
     if (visible) {
-      el.play().catch(() => {});
+      el.play().catch(() => { });
     } else {
       el.pause();
     }
@@ -86,18 +109,45 @@ function AppScreenVideo({ featureId, visible }: { featureId: number; visible: bo
   );
 }
 
-function PhoneFrame({ activeFeature }: { activeFeature: number }) {
-  const feature = FEATURES[activeFeature];
-
+function PhoneFrame({
+  videoFeatureId,
+  glowFeature,
+  heroAmbient,
+  heroAmbientRestartKey,
+  heroAmbientIntroDelaySec,
+}: {
+  videoFeatureId: number;
+  glowFeature: (typeof FEATURES)[number];
+  /** When set (hero panel), cycles subtle radial colors instead of a single story glow. */
+  heroAmbient: HeroAmbientMotion | null;
+  /** Bump when re-entering hero so the cycle remounts from the first keyframe. */
+  heroAmbientRestartKey: number;
+  /** Prepended to the loop transition (seconds); 0 after the user has left hero once. */
+  heroAmbientIntroDelaySec: number;
+}) {
   return (
     <div className="relative" style={{ width: 340, height: 720 }}>
       {/* Glow behind phone */}
-      <motion.div
-        className="absolute inset-0 rounded-[52px] blur-3xl"
-        style={{ background: feature.glow, margin: '-30px' }}
-        animate={{ background: feature.glow }}
-        transition={{ duration: 0.8 }}
-      />
+      {heroAmbient ? (
+        <motion.div
+          key={`hero-phone-ambient-${heroAmbientRestartKey}`}
+          className="absolute inset-0 rounded-[52px] blur-3xl"
+          style={{ margin: '-30px' }}
+          initial={{ background: heroAmbient.backgrounds[0] }}
+          animate={{ background: heroAmbient.backgrounds }}
+          transition={{
+            ...heroAmbient.transition,
+            delay: heroAmbientIntroDelaySec,
+          }}
+        />
+      ) : (
+        <motion.div
+          className="absolute inset-0 rounded-[52px] blur-3xl"
+          style={{ background: glowFeature.glow, margin: '-30px' }}
+          animate={{ background: glowFeature.glow }}
+          transition={{ duration: 0.8 }}
+        />
+      )}
 
       {/* Phone shell */}
       <div
@@ -113,11 +163,9 @@ function PhoneFrame({ activeFeature }: { activeFeature: number }) {
         {/* Notch */}
         <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-7 rounded-full z-10" style={{ background: '#000' }} />
 
-        {/* Screen area */}
+        {/* Screen area — index into FEATURE_VIDEO_SOURCES, not FEATURES ids */}
         <div className="absolute inset-0 rounded-[52px] overflow-hidden">
-          {FEATURES.map((f) => (
-            <AppScreenVideo key={f.id} featureId={f.id} visible={f.id === activeFeature} />
-          ))}
+          <AppScreenVideo key={videoFeatureId} featureId={videoFeatureId} visible />
         </div>
 
         {/* Side button glints */}
@@ -130,6 +178,7 @@ function PhoneFrame({ activeFeature }: { activeFeature: number }) {
 }
 
 function FeatureText({ feature, visible }: { feature: typeof FEATURES[0]; visible: boolean }) {
+  const oneLine = feature.headline.replace(/\n/g, ' ');
   return (
     <AnimatePresence mode="wait">
       {visible && (
@@ -139,10 +188,10 @@ function FeatureText({ feature, visible }: { feature: typeof FEATURES[0]; visibl
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
           transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="space-y-5"
+          className="space-y-5 max-lg:space-y-3"
         >
           <div
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase max-lg:hidden"
             style={{ background: `${feature.color}18`, color: feature.color, border: `1px solid ${feature.color}35` }}
           >
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: feature.color }} />
@@ -150,18 +199,22 @@ function FeatureText({ feature, visible }: { feature: typeof FEATURES[0]; visibl
           </div>
 
           <h2
-            className="text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight"
+            className="text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight max-lg:text-xl max-lg:font-bold max-lg:leading-snug max-lg:tracking-tight max-lg:text-center"
             style={{ color: 'var(--text-primary)', whiteSpace: 'pre-line' }}
           >
-            {feature.headline}
+            <span className="lg:hidden">{oneLine}</span>
+            <span className="hidden lg:inline">{feature.headline}</span>
           </h2>
 
-          <p className="text-base leading-relaxed max-w-sm" style={{ color: 'var(--text-secondary)' }}>
+          <p
+            className="text-base leading-relaxed max-w-sm max-lg:mx-auto max-lg:max-w-[22rem] max-lg:text-[13px] max-lg:leading-[1.55] max-lg:text-center max-lg:line-clamp-2"
+            style={{ color: 'var(--text-secondary)', opacity: 0.88 }}
+          >
             {feature.body}
           </p>
 
           <div
-            className="h-0.5 w-16 rounded-full"
+            className="h-0.5 w-16 rounded-full max-lg:hidden"
             style={{ background: feature.color }}
           />
         </motion.div>
@@ -202,8 +255,9 @@ function ProgressDots({
 
 const SCROLL_PANEL_COUNT = 1 + FEATURES.length;
 
-function phoneFeatureIndexForPanel(panel: number) {
-  return panel <= 0 ? 0 : panel - 1;
+/** Video slot: panel 0 → first clip, panel 1 → second, … clamped to last entry in FEATURE_VIDEO_SOURCES (can exceed FEATURES.length − 1). */
+function phoneVideoIndexForPanel(panel: number) {
+  return Math.min(panel, FEATURE_VIDEO_SOURCES.length - 1);
 }
 
 /** Matches Framer offset ["start start", "end end"]: 0 when section top hits viewport top, 1 when section bottom hits viewport bottom. */
@@ -214,20 +268,55 @@ function getStoryScrollMetrics(el: HTMLElement) {
   const elHeight = el.offsetHeight;
   const vh = window.innerHeight;
   const track = elHeight - vh;
-  return { elTopDoc, track };
+  return { elTopDoc, track, elHeight, vh };
+}
+
+/** 0 during earlier panels; eases 0→1 through the last story segment (scroll-driven). */
+function footerOpacityFromStoryProgress(
+  progress: number,
+  scrollY: number,
+  elTopDoc: number,
+  elHeight: number,
+  vh: number,
+  panelCount: number
+) {
+  const lastPanelStart = (panelCount - 1) / panelCount;
+  const inLastSegment =
+    progress > lastPanelStart
+      ? (progress - lastPanelStart) / (1 - lastPanelStart)
+      : 0;
+  // Smoothstep for a gentler fade
+  const t = Math.min(1, Math.max(0, inLastSegment));
+  const eased = t * t * (3 - 2 * t);
+  const storyBottom = elTopDoc + elHeight;
+  const pastStory = scrollY + vh >= storyBottom - 2;
+  return pastStory ? 1 : eased;
 }
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const [activePanel, setActivePanel] = useState(0);
+  const [footerOpacity, setFooterOpacity] = useState(0);
+  /** Bump when scroll sync moves from a feature panel back to hero so ambient motion remounts. */
+  const [heroAmbientEpoch, setHeroAmbientEpoch] = useState(0);
+  /** After user has scrolled past hero once, skip the initial ambient cycle delay. */
+  const [hasLeftHero, setHasLeftHero] = useState(false);
+  /** Last panel index from scroll sync — used to detect re-entry to hero for ambient restart. */
+  const prevSyncedPanelRef = useRef(0);
 
   const syncPanelFromScroll = useCallback(() => {
     const el = featuresRef.current;
     if (!el) return;
-    const { elTopDoc, track } = getStoryScrollMetrics(el);
+    const { elTopDoc, track, elHeight, vh } = getStoryScrollMetrics(el);
     if (track <= 0) {
+      const prev = prevSyncedPanelRef.current;
+      if (prev !== 0) {
+        setHeroAmbientEpoch((n) => n + 1);
+      }
+      prevSyncedPanelRef.current = 0;
       setActivePanel(0);
+      setFooterOpacity(0);
       return;
     }
     const raw = (window.scrollY - elTopDoc) / track;
@@ -236,7 +325,25 @@ export default function LandingPage() {
       Math.floor(progress * SCROLL_PANEL_COUNT),
       SCROLL_PANEL_COUNT - 1
     );
+    if (index !== 0) {
+      setHasLeftHero(true);
+    }
+    const prev = prevSyncedPanelRef.current;
+    if (index === 0 && prev !== 0) {
+      setHeroAmbientEpoch((n) => n + 1);
+    }
+    prevSyncedPanelRef.current = index;
     setActivePanel(index);
+    setFooterOpacity(
+      footerOpacityFromStoryProgress(
+        progress,
+        window.scrollY,
+        elTopDoc,
+        elHeight,
+        vh,
+        SCROLL_PANEL_COUNT
+      )
+    );
   }, []);
 
   useLayoutEffect(() => {
@@ -267,8 +374,28 @@ export default function LandingPage() {
     };
   }, [syncPanelFromScroll]);
 
-  const phoneFeatureIndex = phoneFeatureIndexForPanel(activePanel);
-  const featureForGlow = FEATURES[phoneFeatureIndex];
+  const storyFeature =
+    activePanel === 0 ? FEATURES[0] : FEATURES[activePanel - 1];
+  const phoneVideoIndex = phoneVideoIndexForPanel(activePanel);
+  const featureForGlow = storyFeature;
+
+  const heroAmbient = useMemo(
+    () => heroAmbientMotionFromConfig(HERO_AMBIENT_CYCLE_CONFIG),
+    []
+  );
+
+  const heroAmbientIntroDelaySec =
+    activePanel === 0 && !hasLeftHero
+      ? (HERO_AMBIENT_CYCLE_CONFIG.initialDelayBeforeCycleSec ?? 0)
+      : 0;
+
+  const heroPageMotionTransition = useMemo(
+    () => ({
+      ...heroAmbient.page.transition,
+      delay: heroAmbientIntroDelaySec,
+    }),
+    [heroAmbient.page.transition, heroAmbientIntroDelaySec]
+  );
 
   const scrollToPanel = (panelIndex: number) => {
     const el = featuresRef.current;
@@ -312,32 +439,45 @@ export default function LandingPage() {
             />
           </div>
 
-          {/* Background glow that morphs with the phone feature */}
+          {/* Background glow: hero = subtle multi-color cycle; feature slides = story tint */}
           <motion.div
+            key={activePanel === 0 ? `hero-page-ambient-${heroAmbientEpoch}` : 'story-page-ambient'}
             className="pointer-events-none absolute inset-0"
-            animate={{ background: `radial-gradient(ellipse at 65% 50%, ${featureForGlow.glow} 0%, transparent 65%)` }}
-            transition={{ duration: 0.8 }}
+            initial={
+              activePanel === 0
+                ? { background: heroAmbient.page.backgrounds[0] }
+                : false
+            }
+            animate={
+              activePanel === 0
+                ? { background: heroAmbient.page.backgrounds }
+                : {
+                  background: `radial-gradient(ellipse at 65% 50%, ${featureForGlow.glow} 0%, transparent 65%)`,
+                }
+            }
+            transition={
+              activePanel === 0 ? heroPageMotionTransition : { duration: 0.8 }
+            }
           />
 
-          {/* Nav */}
-          <nav className="relative z-10 flex items-center justify-between px-8 py-6 lg:px-16 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl">💸</span>
-              <span className="text-xl font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
+          <nav className="relative z-10 flex items-center justify-between gap-3 px-5 py-4 sm:px-8 sm:py-5 lg:px-16 lg:py-6 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink">
+              <SpendriftLogoMark className="h-7 w-auto sm:h-8 lg:h-9" />
+              <span className="text-lg sm:text-xl font-black tracking-tight truncate" style={{ color: 'var(--text-primary)' }}>
                 Spendrift
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">
               <Link
                 href="/privacy_policy"
-                className="text-sm px-4 py-2 rounded-lg transition-opacity hover:opacity-60"
+                className="text-[11px] sm:text-xs lg:text-sm px-1.5 sm:px-3 py-1.5 rounded-lg transition-opacity hover:opacity-60 shrink-0"
                 style={{ color: 'var(--text-secondary)' }}
               >
                 Privacy
               </Link>
               <a
-                href="mailto:punase.ronak99@gmail.com"
-                className="text-sm px-4 py-2 rounded-lg transition-opacity hover:opacity-60"
+                href="mailto:me@ronakpunase.dev"
+                className="hidden sm:inline text-[11px] sm:text-xs lg:text-sm px-1.5 sm:px-3 py-1.5 rounded-lg transition-opacity hover:opacity-60 shrink-0"
                 style={{ color: 'var(--text-secondary)' }}
               >
                 Contact
@@ -346,25 +486,30 @@ export default function LandingPage() {
           </nav>
 
           <div className="relative z-10 flex-1 flex items-center min-h-0">
-            <div className="w-full max-w-7xl mx-auto px-8 lg:px-16 flex flex-col lg:flex-row items-center gap-16 py-8">
+            <div className="w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-16 flex flex-col lg:flex-row items-center gap-6 lg:gap-16 py-4 lg:py-8 min-h-0">
               {/* Left: hero on panel 0, then feature copy */}
-              <div className="flex-1 max-w-lg space-y-8 w-full">
+              <div className="flex-1 max-w-lg space-y-4 lg:space-y-8 w-full min-w-0 max-lg:text-center max-lg:shrink-0">
                 {activePanel === 0 ? (
                   <motion.div
+                    className="text-left"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.1 }}
                   >
                     <div
-                      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-8"
+                      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-8 max-lg:hidden"
                       style={{ background: 'rgba(124, 110, 245, 0.12)', color: '#7c6ef5', border: '1px solid rgba(124,110,245,0.25)' }}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                       Now available on the App Store
                     </div>
 
+                    <div className="flex w-full justify-start mb-5 max-lg:mb-4 lg:mb-7">
+                      <SpendriftLogoMark className="h-14 w-auto sm:h-20 lg:h-24 xl:h-28" />
+                    </div>
+
                     <h1
-                      className="text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.05] tracking-tight mb-6"
+                      className="text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.05] tracking-tight mb-6 max-lg:text-2xl max-lg:mb-3 max-lg:leading-snug"
                       style={{ color: 'var(--text-primary)' }}
                     >
                       Your money,{' '}
@@ -380,29 +525,21 @@ export default function LandingPage() {
                       </span>
                     </h1>
 
-                    <p className="text-lg leading-relaxed mb-10" style={{ color: 'var(--text-secondary)' }}>
-                      Track expenses, set budgets, and reach your savings goals —
-                      all completely private and on your device.
+                    <p
+                      className="text-lg leading-relaxed mb-10 max-lg:mb-4 max-lg:text-[13px] max-lg:leading-[1.55] max-lg:max-w-md max-lg:line-clamp-2"
+                      style={{ color: 'var(--text-secondary)', opacity: 0.88 }}
+                    >
+                      Built to bring ease in expense tracking. Upload your bank statements, speak your expenses or track them without ever opening the app.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row gap-3 items-start">
-                      <a
-                        href="#"
-                        className="group inline-flex items-center gap-3 px-6 py-4 rounded-2xl font-semibold text-sm transition-all hover:scale-[1.02] hover:shadow-2xl"
-                        style={{
-                          background: 'var(--text-primary)',
-                          color: 'var(--bg)',
-                          boxShadow: '0 8px 32px rgba(124,110,245,0.25)',
-                        }}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-                        </svg>
-                        Download on the App Store
-                      </a>
-                    </div>
 
-                    <div className="mt-10 flex flex-wrap items-center gap-6">
+                    <AppStoreDownloadBadge
+                      size="lg"
+                      className="hover:shadow-2xl max-lg:w-full max-lg:max-w-xs max-lg:justify-center"
+                    />
+
+
+                    <div className="mt-10 flex flex-wrap items-center gap-6 max-lg:hidden">
                       <div>
                         <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>4.9★</p>
                         <p className="text-xs" style={{ color: 'var(--text-muted)' }}>App Store rating</p>
@@ -423,20 +560,28 @@ export default function LandingPage() {
                   <FeatureText feature={FEATURES[activePanel - 1]} visible={true} />
                 )}
 
-                <ProgressDots
-                  total={SCROLL_PANEL_COUNT}
-                  active={activePanel}
-                  activeColor={dotActiveColor}
-                  onChange={scrollToPanel}
-                />
+                {/* <div className="hidden lg:block">
+                  <ProgressDots
+                    total={SCROLL_PANEL_COUNT}
+                    active={activePanel}
+                    activeColor={dotActiveColor}
+                    onChange={scrollToPanel}
+                  />
+                </div> */}
               </div>
 
               {/* Right: phone */}
               <motion.div
                 className="flex-shrink-0 relative"
+                layout="position"
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.9, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+                transition={{
+                  layout: { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] },
+                  opacity: { duration: 0.9, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] },
+                  y: { duration: 0.9, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] },
+                  scale: { duration: 0.9, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] },
+                }}
               >
                 {activePanel === 0 && (
                   <>
@@ -468,31 +613,53 @@ export default function LandingPage() {
                   </>
                 )}
 
-                <PhoneFrame activeFeature={phoneFeatureIndex} />
+                <div className="max-lg:relative max-lg:mx-auto max-lg:h-[min(52vh,520px)] max-lg:w-full max-lg:flex max-lg:justify-center lg:contents">
+                  <div className="max-lg:absolute max-lg:left-1/2 max-lg:top-0 max-lg:-translate-x-1/2 max-lg:origin-top max-lg:scale-[0.74] lg:static lg:translate-x-0 lg:scale-100">
+                    <PhoneFrame
+                      videoFeatureId={phoneVideoIndex}
+                      glowFeature={storyFeature}
+                      heroAmbient={activePanel === 0 ? heroAmbient.phone : null}
+                      heroAmbientRestartKey={heroAmbientEpoch}
+                      heroAmbientIntroDelaySec={heroAmbientIntroDelaySec}
+                    />
+                  </div>
+                </div>
               </motion.div>
             </div>
           </div>
 
-          {/* Scroll hint — only on first panel; scrolling advances panels immediately */}
-          {activePanel === 0 && (
+          {/* Scroll hint — keep footprint when past panel 0 so sticky layout doesn’t jump */}
+          <motion.div
+            className="relative z-10 flex flex-col items-center gap-2 pb-6 lg:pb-8 shrink-0 max-lg:min-h-[52px]"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: activePanel === 0 ? 1 : 0,
+            }}
+            transition={{
+              opacity: { duration: activePanel === 0 ? 0.8 : 0.35 },
+            }}
+            aria-hidden={activePanel !== 0}
+            style={{ pointerEvents: activePanel === 0 ? 'auto' : 'none' }}
+          >
+            <p className="text-[10px] lg:text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>Scroll to explore</p>
             <motion.div
-              className="relative z-10 flex flex-col items-center gap-2 pb-8 shrink-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2, duration: 0.8 }}
-            >
-              <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-muted)' }}>Scroll to explore</p>
-              <motion.div
-                className="w-px h-10"
-                style={{ background: 'linear-gradient(to bottom, var(--border), transparent)' }}
-                animate={{ scaleY: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            </motion.div>
-          )}
+              className="w-px h-10"
+              style={{ background: 'linear-gradient(to bottom, var(--border), transparent)' }}
+              animate={
+                activePanel === 0
+                  ? { scaleY: [0.5, 1, 0.5] }
+                  : { scaleY: 0.5 }
+              }
+              transition={
+                activePanel === 0
+                  ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
+                  : { duration: 0.2 }
+              }
+            />
+          </motion.div>
 
-          {/* Panel counter */}
-          <div className="absolute top-20 lg:top-24 right-8 lg:right-16 text-right pointer-events-none">
+          {/* Panel counter — desktop only */}
+          <div className="absolute top-20 lg:top-24 right-8 lg:right-16 text-right pointer-events-none hidden lg:block">
             <AnimatePresence mode="wait">
               <motion.p
                 key={activePanel}
@@ -512,84 +679,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA SECTION ── */}
-      <section className="relative py-40 overflow-hidden">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-20"
-          style={{ background: 'radial-gradient(ellipse at 50% 50%, #7c6ef5 0%, transparent 60%)' }}
-        />
-
-        <div className="relative z-10 max-w-3xl mx-auto px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="text-5xl mb-6">💸</div>
-            <h2
-              className="text-4xl lg:text-6xl font-black leading-tight tracking-tight mb-6"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Take control of your
-              <br />
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #7c6ef5, #5ee7df)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                financial future.
-              </span>
-            </h2>
-
-            <p className="text-lg mb-10 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-              Join thousands of people already using Spendrift to build better money habits.
-            </p>
-
-            <a
-              href="#"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-base transition-all hover:scale-[1.03]"
-              style={{
-                background: 'var(--text-primary)',
-                color: 'var(--bg)',
-                boxShadow: '0 16px 48px rgba(124,110,245,0.35)',
-              }}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-              </svg>
-              Download on the App Store — Free
-            </a>
-
-            <p className="mt-5 text-xs" style={{ color: 'var(--text-muted)' }}>
-              No account required · No data collection · Works offline
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── FOOTER ── */}
       <footer
-        className="border-t py-10 px-8 lg:px-16"
-        style={{ borderColor: 'var(--border)' }}
+        className="fixed bottom-0 left-0 right-0 z-30 px-6 pb-8 pt-4 text-center pointer-events-none"
+        style={{ opacity: footerOpacity }}
+        aria-hidden={footerOpacity < 0.03}
       >
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">💸</span>
-            <span className="font-bold" style={{ color: 'var(--text-primary)' }}>Spendrift</span>
-          </div>
-          <div className="flex items-center gap-6 text-sm" style={{ color: 'var(--text-muted)' }}>
-            <Link href="/privacy_policy" className="hover:opacity-70 transition-opacity">
-              Privacy Policy
-            </Link>
-            <a href="mailto:punase.ronak99@gmail.com" className="hover:opacity-70 transition-opacity">
-              Contact
-            </a>
-            <span>© 2026 Spendrift</span>
-          </div>
-        </div>
+        <p
+          className="text-[13px] leading-relaxed tracking-wide"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          Built by Ronak. Copyright 2026 spendrift.
+        </p>
       </footer>
     </div>
   );

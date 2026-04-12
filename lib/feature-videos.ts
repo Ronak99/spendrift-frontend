@@ -3,8 +3,11 @@
  * Replace these files under `public/videos/` with your own MP4s (H.264 + AAC or silent).
  */
 export const FEATURE_VIDEO_SOURCES = [
-  '/videos/feature-0.mp4',
-  '/videos/feature-1.mp4',
-  '/videos/feature-2.mp4',
-  '/videos/feature-3.mp4',
+  '/videos/onboarding.mov',
+  '/videos/create-transaction.mov',
+  '/videos/accessibility.mov',
+  '/videos/type-expense-shortcut.mov',
+  '/videos/voice-expenses.mov',
+  '/videos/import-statement.mov',
+  '/videos/analytics.mov',
 ] as const;
