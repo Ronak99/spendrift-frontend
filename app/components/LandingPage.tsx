@@ -3,7 +3,7 @@
 import { useRef, useEffect, useLayoutEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { FEATURE_VIDEO_SOURCES } from '@/lib/marketing-video-urls';
+import { FEATURE_VIDEO_SOURCES, VOICE_EXPENSES_VIDEO_INDEX } from '@/lib/marketing-video-urls';
 import {
   HERO_AMBIENT_CYCLE_CONFIG,
   heroAmbientMotionFromConfig,
@@ -63,9 +63,24 @@ const FEATURES = [
   },
 ];
 
-function AppScreenVideo({ featureId, visible }: { featureId: number; visible: boolean }) {
+function AppScreenVideo({
+  featureId,
+  visible,
+  muted,
+}: {
+  featureId: number;
+  visible: boolean;
+  /** When false, audio may play (subject to browser autoplay rules). */
+  muted: boolean;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const src = FEATURE_VIDEO_SOURCES[featureId];
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.muted = muted;
+  }, [muted]);
 
   useEffect(() => {
     const el = ref.current;
@@ -93,7 +108,7 @@ function AppScreenVideo({ featureId, visible }: { featureId: number; visible: bo
             className="chromeless-marketing-video absolute inset-0 h-full w-full"
             src={src}
             autoPlay
-            muted
+            muted={muted}
             loop
             playsInline
             preload="auto"
@@ -109,12 +124,45 @@ function AppScreenVideo({ featureId, visible }: { featureId: number; visible: bo
   );
 }
 
+function VoiceVideoSoundToggle({
+  soundOn,
+  onToggle,
+}: {
+  soundOn: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="absolute bottom-14 right-3 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white shadow-lg backdrop-blur-md transition hover:bg-black/55 active:scale-95"
+      aria-label={soundOn ? 'Mute demo audio' : 'Unmute demo audio'}
+      aria-pressed={soundOn}
+    >
+      {soundOn ? (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        </svg>
+      ) : (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 function PhoneFrame({
   videoFeatureId,
   glowFeature,
   heroAmbient,
   heroAmbientRestartKey,
   heroAmbientIntroDelaySec,
+  videoMuted,
+  showVoiceSoundToggle,
+  voiceSoundOn,
+  onVoiceSoundToggle,
 }: {
   videoFeatureId: number;
   glowFeature: (typeof FEATURES)[number];
@@ -124,6 +172,11 @@ function PhoneFrame({
   heroAmbientRestartKey: number;
   /** Prepended to the loop transition (seconds); 0 after the user has left hero once. */
   heroAmbientIntroDelaySec: number;
+  videoMuted: boolean;
+  /** Voice-expense slide only: speaker control. */
+  showVoiceSoundToggle: boolean;
+  voiceSoundOn: boolean;
+  onVoiceSoundToggle: () => void;
 }) {
   return (
     <div className="relative" style={{ width: 340, height: 720 }}>
@@ -165,8 +218,12 @@ function PhoneFrame({
 
         {/* Screen area — `videoFeatureId` indexes FEATURE_VIDEO_SOURCES (7 clips vs 6 feature slides). */}
         <div className="absolute inset-0 rounded-[52px] overflow-hidden">
-          <AppScreenVideo key={videoFeatureId} featureId={videoFeatureId} visible />
+          <AppScreenVideo key={videoFeatureId} featureId={videoFeatureId} visible muted={videoMuted} />
         </div>
+
+        {showVoiceSoundToggle && (
+          <VoiceVideoSoundToggle soundOn={voiceSoundOn} onToggle={onVoiceSoundToggle} />
+        )}
 
         {/* Side button glints */}
         <div className="absolute right-0 top-28 w-1 h-16 rounded-l-full" style={{ background: 'rgba(255,255,255,0.08)' }} />
@@ -302,6 +359,8 @@ export default function LandingPage() {
   const [heroAmbientEpoch, setHeroAmbientEpoch] = useState(0);
   /** After user has scrolled past hero once, skip the initial ambient cycle delay. */
   const [hasLeftHero, setHasLeftHero] = useState(false);
+  /** Voice-expense slide only: default on; resets when leaving that video. */
+  const [voiceExpensesSoundOn, setVoiceExpensesSoundOn] = useState(true);
   /** Last panel index from scroll sync — used to detect re-entry to hero for ambient restart. */
   const prevSyncedPanelRef = useRef(0);
 
@@ -331,6 +390,14 @@ export default function LandingPage() {
     const prev = prevSyncedPanelRef.current;
     if (index === 0 && prev !== 0) {
       setHeroAmbientEpoch((n) => n + 1);
+    }
+    const prevVid = phoneVideoIndexForPanel(prev);
+    const nextVid = phoneVideoIndexForPanel(index);
+    if (
+      nextVid === VOICE_EXPENSES_VIDEO_INDEX &&
+      prevVid !== VOICE_EXPENSES_VIDEO_INDEX
+    ) {
+      setVoiceExpensesSoundOn(true);
     }
     prevSyncedPanelRef.current = index;
     setActivePanel(index);
@@ -377,6 +444,8 @@ export default function LandingPage() {
   const storyFeature =
     activePanel === 0 ? FEATURES[0] : FEATURES[activePanel - 1];
   const phoneVideoIndex = phoneVideoIndexForPanel(activePanel);
+  const showVoiceSoundToggle = phoneVideoIndex === VOICE_EXPENSES_VIDEO_INDEX;
+  const videoMuted = showVoiceSoundToggle ? !voiceExpensesSoundOn : true;
   const featureForGlow = storyFeature;
 
   const heroAmbient = useMemo(
@@ -621,6 +690,12 @@ export default function LandingPage() {
                       heroAmbient={activePanel === 0 ? heroAmbient.phone : null}
                       heroAmbientRestartKey={heroAmbientEpoch}
                       heroAmbientIntroDelaySec={heroAmbientIntroDelaySec}
+                      videoMuted={videoMuted}
+                      showVoiceSoundToggle={showVoiceSoundToggle}
+                      voiceSoundOn={voiceExpensesSoundOn}
+                      onVoiceSoundToggle={() =>
+                        setVoiceExpensesSoundOn((on) => !on)
+                      }
                     />
                   </div>
                 </div>

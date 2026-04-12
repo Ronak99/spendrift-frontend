@@ -11,3 +11,9 @@ export const FEATURE_VIDEO_SOURCES = [
   'https://res.cloudinary.com/dhzx4ux2v/video/upload/v1776014072/import-statement_ifytdl.mp4',
   'https://res.cloudinary.com/dhzx4ux2v/video/upload/v1776014088/analytics_wrdpq8.mp4',
 ] as const;
+
+/** Index into `FEATURE_VIDEO_SOURCES` for the voice-expense clip (used for optional sound UI). */
+export const VOICE_EXPENSES_VIDEO_INDEX: number = (() => {
+  const i = FEATURE_VIDEO_SOURCES.findIndex((url) => url.includes('voice-expense'));
+  return i >= 0 ? i : 4;
+})();
