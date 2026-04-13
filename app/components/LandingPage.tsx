@@ -546,24 +546,22 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="mx-auto mt-6 flex w-full max-w-[300px] justify-center">
-            <div className="origin-top scale-[0.8]" style={{ width: '100%' }}>
-              <div
-                className="rounded-[2.35rem] p-[10px]"
-                style={{
-                  background: 'var(--phone-bg)',
-                  border: '1.5px solid rgba(255,255,255,0.12)',
-                  boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)',
-                }}
-                aria-label="Spendrift app preview"
-              >
-                <div className="relative aspect-[9/19.2] w-full overflow-hidden rounded-[1.9rem] bg-black">
-                  <div
-                    className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-[4.5rem] -translate-x-1/2 rounded-full bg-black"
-                    aria-hidden
-                  />
-                  <MobileHeroVideo />
-                </div>
+          <div className="mx-auto mt-6 w-full max-w-[240px] sm:max-w-[256px]">
+            <div
+              className="rounded-[2.35rem] p-[10px]"
+              style={{
+                background: 'var(--phone-bg)',
+                border: '1.5px solid rgba(255,255,255,0.12)',
+                boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)',
+              }}
+              aria-label="Spendrift app preview"
+            >
+              <div className="relative aspect-[9/19.2] w-full overflow-hidden rounded-[1.9rem] bg-black">
+                <div
+                  className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-[4.5rem] -translate-x-1/2 rounded-full bg-black"
+                  aria-hidden
+                />
+                <MobileHeroVideo />
               </div>
             </div>
           </div>
