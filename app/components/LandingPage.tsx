@@ -567,21 +567,29 @@ export default function LandingPage() {
           </div>
         </main>
 
-        <footer
-          className="relative z-10 border-t px-5 py-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
-          style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
-        >
-          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-            <Link href="/privacy_policy" className="transition-opacity hover:opacity-70">
-              Privacy
-            </Link>
-            <a href="mailto:me@ronakpunase.dev" className="transition-opacity hover:opacity-70">
-              Contact
-            </a>
-          </nav>
-          <p className="mt-4 text-center text-xs tracking-wide" style={{ color: 'var(--text-muted)' }}>
-            Built by Ronak
-          </p>
+        <footer className="relative z-10 mt-auto px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-10">
+          <div
+            className="relative mx-auto flex max-w-md flex-col items-center gap-3 border-t border-white/[0.06] pt-6 sm:flex-row sm:justify-between sm:gap-4"
+          >
+            <nav
+              className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 text-[13px] font-medium sm:justify-start"
+              style={{ color: 'var(--text-secondary)' }}
+              aria-label="Footer"
+            >
+              <Link href="/privacy_policy" className="rounded-md px-2 py-1 transition-opacity hover:opacity-80">
+                Privacy
+              </Link>
+              <span className="select-none px-1 opacity-25" style={{ color: 'var(--text-primary)' }} aria-hidden>
+                ·
+              </span>
+              <a href="mailto:me@ronakpunase.dev" className="rounded-md px-2 py-1 transition-opacity hover:opacity-80">
+                Contact
+              </a>
+            </nav>
+            <p className="text-center text-[11px] tracking-wide sm:text-right" style={{ color: 'var(--text-muted)' }}>
+              Built by Ronak
+            </p>
+          </div>
         </footer>
       </div>
 
