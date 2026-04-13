@@ -343,7 +343,6 @@ function footerOpacityFromStoryProgress(
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activePanel, setActivePanel] = useState(0);
   const [footerOpacity, setFooterOpacity] = useState(0);
   /** Bump when scroll sync moves from a feature panel back to hero so ambient motion remounts. */
@@ -489,75 +488,27 @@ export default function LandingPage() {
           }}
         />
 
-        <header className="relative z-20 flex items-center justify-between gap-3 px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-3">
-          <div className="flex min-w-0 items-center gap-2.5" aria-label="Spendrift home">
+        <header className="relative z-20 flex items-center justify-between gap-2 px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5" aria-label="Spendrift home">
             <SpendriftLogoMark className="h-9 w-auto shrink-0 sm:h-10" />
             <span className="truncate text-lg font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
               Spendrift
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen((open) => !open)}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/12 text-white shadow-lg transition active:scale-[0.98]"
+          <a
+            href={SPENDRIFT_APP_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-full border border-white/12 px-3 py-2 text-center text-[11px] font-semibold leading-tight text-white shadow-lg transition active:scale-[0.98] sm:px-3.5 sm:text-xs"
             style={{
               background: 'linear-gradient(135deg, rgba(124, 110, 245, 0.95), rgba(94, 231, 223, 0.55))',
               boxShadow: '0 12px 40px rgba(124, 110, 245, 0.25)',
+              maxWidth: '11rem',
             }}
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-marketing-menu"
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
-            {mobileMenuOpen ? (
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            ) : (
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-                <path strokeLinecap="round" d="M5 7h14M5 12h14M5 17h14" />
-              </svg>
-            )}
-          </button>
+            Download from App&nbsp;Store
+          </a>
         </header>
-
-        {mobileMenuOpen && (
-          <div
-            id="mobile-marketing-menu"
-            className="absolute left-0 right-0 top-[calc(3.25rem+env(safe-area-inset-top))] z-30 mx-4 rounded-2xl border p-4 shadow-xl"
-            style={{
-              background: 'var(--surface-2)',
-              borderColor: 'var(--border)',
-              boxShadow: '0 24px 80px rgba(0,0,0,0.45)',
-            }}
-            role="dialog"
-            aria-label="Menu"
-          >
-            <nav className="flex flex-col gap-1 text-[15px] font-medium" style={{ color: 'var(--text-secondary)' }}>
-              <a
-                href="#mobile-features"
-                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
-                style={{ color: 'var(--text-primary)' }}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Features
-              </a>
-              <Link
-                href="/privacy_policy"
-                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Privacy
-              </Link>
-              <a
-                href="mailto:me@ronakpunase.dev"
-                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Contact
-              </a>
-            </nav>
-          </div>
-        )}
 
         <main className="relative z-10 flex w-full max-w-lg flex-1 flex-col px-5 pb-10 pt-2 sm:mx-auto">
           <div
@@ -586,112 +537,36 @@ export default function LandingPage() {
             Built to bring ease in expense tracking. Upload bank statements, speak expenses, or track them without ever opening the app.
           </p>
 
-          <div className="mx-auto mt-7 w-full max-w-[300px]">
-            <div
-              className="rounded-[2.35rem] p-[10px]"
-              style={{
-                background: 'var(--phone-bg)',
-                border: '1.5px solid rgba(255,255,255,0.12)',
-                boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)',
-              }}
-              aria-label="Spendrift app preview"
-            >
-              <div className="relative aspect-[9/19.2] w-full overflow-hidden rounded-[1.9rem] bg-black">
-                <div
-                  className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-[4.5rem] -translate-x-1/2 rounded-full bg-black"
-                  aria-hidden
-                />
-                <MobileHeroVideo />
+          <div className="mx-auto mt-8 flex flex-col items-center gap-1">
+            <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
+              4.9<span className="text-lg">★</span>
+            </p>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              App Store rating
+            </p>
+          </div>
+
+          <div className="mx-auto mt-6 flex w-full max-w-[300px] justify-center">
+            <div className="origin-top scale-[0.8]" style={{ width: '100%' }}>
+              <div
+                className="rounded-[2.35rem] p-[10px]"
+                style={{
+                  background: 'var(--phone-bg)',
+                  border: '1.5px solid rgba(255,255,255,0.12)',
+                  boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)',
+                }}
+                aria-label="Spendrift app preview"
+              >
+                <div className="relative aspect-[9/19.2] w-full overflow-hidden rounded-[1.9rem] bg-black">
+                  <div
+                    className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-[4.5rem] -translate-x-1/2 rounded-full bg-black"
+                    aria-hidden
+                  />
+                  <MobileHeroVideo />
+                </div>
               </div>
             </div>
           </div>
-
-          <div className="mx-auto mt-8 flex w-full max-w-md flex-col items-stretch gap-3">
-            <a
-              href={SPENDRIFT_APP_STORE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-12 w-full items-center justify-center rounded-full text-[15px] font-semibold text-white transition active:scale-[0.99]"
-              style={{
-                background: 'linear-gradient(135deg, #7c6ef5, #6b5fd4)',
-                boxShadow: '0 14px 44px rgba(124, 110, 245, 0.35)',
-              }}
-            >
-              Get the app
-            </a>
-            <div className="flex justify-center">
-              <AppStoreDownloadBadge size="md" />
-            </div>
-          </div>
-
-          <div className="mx-auto mt-8 grid w-full max-w-md grid-cols-3 gap-3 text-center">
-            <div
-              className="rounded-2xl px-2 py-3"
-              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-            >
-              <p className="text-lg font-black" style={{ color: 'var(--text-primary)' }}>4.9★</p>
-              <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-muted)' }}>App Store</p>
-            </div>
-            <div
-              className="rounded-2xl px-2 py-3"
-              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-            >
-              <p className="text-lg font-black" style={{ color: 'var(--text-primary)' }}>100%</p>
-              <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-muted)' }}>On-device</p>
-            </div>
-            <div
-              className="rounded-2xl px-2 py-3"
-              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
-            >
-              <p className="text-lg font-black" style={{ color: 'var(--text-primary)' }}>Free</p>
-              <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-muted)' }}>Download</p>
-            </div>
-          </div>
-
-          <section id="mobile-features" className="mt-12 scroll-mt-24">
-            <div
-              className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold tracking-wide"
-              style={{
-                background: 'rgba(124, 110, 245, 0.12)',
-                borderColor: 'rgba(124, 110, 245, 0.25)',
-                color: '#a89ff7',
-              }}
-            >
-              <span aria-hidden>★</span>
-              Features
-            </div>
-            <h2 className="text-xl font-black tracking-tight sm:text-2xl" style={{ color: 'var(--text-primary)' }}>
-              One place for your spending story
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)', opacity: 0.88 }}>
-              Everything you need to stay organized stays on your iPhone.
-            </p>
-
-            <ul className="mt-6 flex flex-col gap-4">
-              {FEATURES.map((feature, i) => (
-                <li
-                  key={feature.id}
-                  className="rounded-2xl p-4"
-                  style={{
-                    background: 'var(--surface-2)',
-                    border: '1px solid var(--border)',
-                    boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
-                  }}
-                >
-                  <p className="text-xs font-bold tabular-nums" style={{ color: '#7c6ef5' }}>
-                    {String(i + 1).padStart(2, '0')}
-                  </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
-                    {feature.tag}
-                  </p>
-                  <h3 className="mt-2 text-[17px] font-bold leading-snug" style={{ color: 'var(--text-primary)' }}>
-                    {feature.headline.replace(/\n/g, ' ')}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)', opacity: 0.88 }}>{feature.body}</p>
-                </li>
-              ))}
-            </ul>
-          </section>
         </main>
 
         <footer
