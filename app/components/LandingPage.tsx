@@ -10,7 +10,7 @@ import {
   type HeroAmbientMotion,
 } from '@/lib/hero-ambient-cycle';
 import { SpendriftLogoMark } from './SpendriftLogoMark';
-import { AppStoreDownloadBadge } from './AppStoreDownloadBadge';
+import { AppStoreDownloadBadge, SPENDRIFT_APP_STORE_URL } from './AppStoreDownloadBadge';
 
 const FEATURES = [
   {
@@ -234,6 +234,26 @@ function PhoneFrame({
   );
 }
 
+function MobileHeroVideo() {
+  const src = FEATURE_VIDEO_SOURCES[0];
+  return (
+    <video
+      className="chromeless-marketing-video h-full w-full object-cover"
+      src={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      controls={false}
+      controlsList="nodownload nofullscreen noremoteplayback"
+      disablePictureInPicture
+      disableRemotePlayback
+      aria-label="App screen recording preview"
+    />
+  );
+}
+
 function FeatureText({ feature, visible }: { feature: typeof FEATURES[0]; visible: boolean }) {
   const oneLine = feature.headline.replace(/\n/g, ' ');
   return (
@@ -438,8 +458,8 @@ export default function LandingPage() {
 
   return (
     <div ref={containerRef} style={{ background: 'var(--bg)' }}>
-      {/* Mobile: single screen, no scroll story or top nav */}
-      <div className="relative flex min-h-[100dvh] flex-col lg:hidden">
+      {/* Mobile: dark marketing layout + device frame — same ambience as desktop hero, no scroll story */}
+      <div className="relative flex min-h-[100dvh] flex-col overflow-hidden lg:hidden" style={{ background: 'var(--bg)', color: 'var(--text-primary)' }}>
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.03]"
           style={{
@@ -449,40 +469,75 @@ export default function LandingPage() {
         />
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div
-            className="absolute rounded-full blur-[100px] opacity-15"
+            className="absolute rounded-full blur-[100px] opacity-20"
             style={{ width: 280, height: 280, top: -60, left: '50%', transform: 'translateX(-50%)', background: '#7c6ef5' }}
           />
           <div
-            className="absolute rounded-full blur-[90px] opacity-12"
-            style={{ width: 220, height: 220, bottom: 80, right: -40, background: '#5ee7df' }}
+            className="absolute rounded-full blur-[90px] opacity-15"
+            style={{ width: 220, height: 220, bottom: 40, right: -40, background: '#5ee7df' }}
           />
         </div>
+        <motion.div
+          key={`mobile-hero-ambient-${heroAmbientEpoch}`}
+          className="pointer-events-none absolute inset-0"
+          initial={{ background: heroAmbient.page.backgrounds[0] }}
+          animate={{ background: heroAmbient.page.backgrounds }}
+          transition={{
+            ...heroAmbient.page.transition,
+            delay: heroAmbientIntroDelaySec,
+          }}
+        />
 
-        <main className="relative z-10 flex flex-1 flex-col items-center px-6 pt-12 pb-6 text-center">
-          <SpendriftLogoMark className="h-16 w-auto sm:h-20" />
-
-          <h1
-            className="mt-8 max-w-md text-3xl font-black leading-[1.12] tracking-tight sm:text-4xl"
-            style={{ color: 'var(--text-primary)' }}
+        <header className="relative z-20 flex items-center justify-between gap-2 px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5" aria-label="Spendrift home">
+            <SpendriftLogoMark className="h-9 w-auto shrink-0 sm:h-10" />
+            <span className="truncate text-lg font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              Spendrift
+            </span>
+          </div>
+          <a
+            href={SPENDRIFT_APP_STORE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-full border border-white/12 px-3 py-2 text-center text-[11px] font-semibold leading-tight text-white shadow-lg transition active:scale-[0.98] sm:px-3.5 sm:text-xs"
+            style={{
+              background: 'linear-gradient(135deg, rgba(124, 110, 245, 0.95), rgba(94, 231, 223, 0.55))',
+              boxShadow: '0 12px 40px rgba(124, 110, 245, 0.25)',
+              maxWidth: '11rem',
+            }}
           >
+            Download from App&nbsp;Store
+          </a>
+        </header>
+
+        <main className="relative z-10 flex w-full max-w-lg flex-1 flex-col px-5 pb-10 pt-2 sm:mx-auto">
+          <div
+            className="mb-5 inline-flex w-fit items-center gap-2 self-center rounded-full border px-3.5 py-1.5 text-xs font-semibold tracking-wide"
+            style={{
+              background: 'rgba(124, 110, 245, 0.12)',
+              borderColor: 'rgba(124, 110, 245, 0.25)',
+              color: '#a89ff7',
+            }}
+          >
+            <span className="text-[13px]" aria-hidden>
+              ★
+            </span>
+            Privacy-first finance
+          </div>
+
+          <h1 className="text-center text-[1.65rem] font-black leading-[1.12] tracking-tight sm:text-3xl" style={{ color: 'var(--text-primary)' }}>
             Your money,{' '}
             <span
-              className="relative"
-              style={{
-                background: 'linear-gradient(135deg, #7c6ef5, #5ee7df)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
+              className="bg-gradient-to-br from-[#7c6ef5] to-[#5ee7df] bg-clip-text text-transparent"
             >
               understood.
             </span>
           </h1>
+          <p className="mx-auto mt-3 max-w-md text-center text-[15px] leading-relaxed" style={{ color: 'var(--text-secondary)', opacity: 0.88 }}>
+            Built to bring ease in expense tracking. Upload bank statements, speak expenses, or track them without ever opening the app.
+          </p>
 
-          <div className="mt-10">
-            <AppStoreDownloadBadge size="md" className="mx-auto" />
-          </div>
-
-          <div className="mt-8 flex flex-col items-center gap-1">
+          <div className="mx-auto mt-8 flex flex-col items-center gap-1">
             <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
               4.9<span className="text-lg">★</span>
             </p>
@@ -490,34 +545,51 @@ export default function LandingPage() {
               App Store rating
             </p>
           </div>
+
+          <div className="mx-auto mt-6 w-full max-w-[240px] sm:max-w-[256px]">
+            <div
+              className="rounded-[2.35rem] p-[10px]"
+              style={{
+                background: 'var(--phone-bg)',
+                border: '1.5px solid rgba(255,255,255,0.12)',
+                boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)',
+              }}
+              aria-label="Spendrift app preview"
+            >
+              <div className="relative aspect-[9/19.2] w-full overflow-hidden rounded-[1.9rem] bg-black">
+                <div
+                  className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-[4.5rem] -translate-x-1/2 rounded-full bg-black"
+                  aria-hidden
+                />
+                <MobileHeroVideo />
+              </div>
+            </div>
+          </div>
         </main>
 
-        <footer
-          className="relative z-10 mt-auto border-t px-6 py-8"
-          style={{ borderColor: 'var(--border)' }}
-        >
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
-            <Link
-              href="/privacy_policy"
-              className="transition-opacity hover:opacity-70"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Privacy
-            </Link>
-            <a
-              href="mailto:me@ronakpunase.dev"
-              className="transition-opacity hover:opacity-70"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Contact
-            </a>
-          </nav>
-          <p
-            className="mt-4 text-center text-xs tracking-wide"
-            style={{ color: 'var(--text-muted)' }}
+        <footer className="relative z-10 mt-auto px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-10">
+          <div
+            className="relative mx-auto flex max-w-md flex-col items-center gap-3 border-t border-white/[0.06] pt-6 sm:flex-row sm:justify-between sm:gap-4"
           >
-            Built by Ronak
-          </p>
+            <nav
+              className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 text-[13px] font-medium sm:justify-start"
+              style={{ color: 'var(--text-secondary)' }}
+              aria-label="Footer"
+            >
+              <Link href="/privacy_policy" className="rounded-md px-2 py-1 transition-opacity hover:opacity-80">
+                Privacy
+              </Link>
+              <span className="select-none px-1 opacity-25" style={{ color: 'var(--text-primary)' }} aria-hidden>
+                ·
+              </span>
+              <a href="mailto:me@ronakpunase.dev" className="rounded-md px-2 py-1 transition-opacity hover:opacity-80">
+                Contact
+              </a>
+            </nav>
+            <p className="text-center text-[11px] tracking-wide sm:text-right" style={{ color: 'var(--text-muted)' }}>
+              Built by Ronak
+            </p>
+          </div>
         </footer>
       </div>
 
