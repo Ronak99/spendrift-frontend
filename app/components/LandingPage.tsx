@@ -10,7 +10,7 @@ import {
   type HeroAmbientMotion,
 } from '@/lib/hero-ambient-cycle';
 import { SpendriftLogoMark } from './SpendriftLogoMark';
-import { AppStoreDownloadBadge } from './AppStoreDownloadBadge';
+import { AppStoreDownloadBadge, SPENDRIFT_APP_STORE_URL } from './AppStoreDownloadBadge';
 
 const FEATURES = [
   {
@@ -234,6 +234,26 @@ function PhoneFrame({
   );
 }
 
+function MobileHeroVideo() {
+  const src = FEATURE_VIDEO_SOURCES[0];
+  return (
+    <video
+      className="chromeless-marketing-video h-full w-full object-cover"
+      src={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      controls={false}
+      controlsList="nodownload nofullscreen noremoteplayback"
+      disablePictureInPicture
+      disableRemotePlayback
+      aria-label="App screen recording preview"
+    />
+  );
+}
+
 function FeatureText({ feature, visible }: { feature: typeof FEATURES[0]; visible: boolean }) {
   const oneLine = feature.headline.replace(/\n/g, ' ');
   return (
@@ -323,6 +343,7 @@ function footerOpacityFromStoryProgress(
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activePanel, setActivePanel] = useState(0);
   const [footerOpacity, setFooterOpacity] = useState(0);
   /** Bump when scroll sync moves from a feature panel back to hero so ambient motion remounts. */
@@ -438,86 +459,188 @@ export default function LandingPage() {
 
   return (
     <div ref={containerRef} style={{ background: 'var(--bg)' }}>
-      {/* Mobile: single screen, no scroll story or top nav */}
-      <div className="relative flex min-h-[100dvh] flex-col lg:hidden">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'repeat',
-          }}
-        />
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div
-            className="absolute rounded-full blur-[100px] opacity-15"
-            style={{ width: 280, height: 280, top: -60, left: '50%', transform: 'translateX(-50%)', background: '#7c6ef5' }}
-          />
-          <div
-            className="absolute rounded-full blur-[90px] opacity-12"
-            style={{ width: 220, height: 220, bottom: 80, right: -40, background: '#5ee7df' }}
-          />
-        </div>
-
-        <main className="relative z-10 flex flex-1 flex-col items-center px-6 pt-12 pb-6 text-center">
-          <SpendriftLogoMark className="h-16 w-auto sm:h-20" />
-
-          <h1
-            className="mt-8 max-w-md text-3xl font-black leading-[1.12] tracking-tight sm:text-4xl"
-            style={{ color: 'var(--text-primary)' }}
-          >
-            Your money,{' '}
-            <span
-              className="relative"
-              style={{
-                background: 'linear-gradient(135deg, #7c6ef5, #5ee7df)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              understood.
+      {/* Mobile: light marketing layout + device frame — no scroll-driven story */}
+      <div
+        className="relative flex min-h-[100dvh] flex-col lg:hidden"
+        style={{ background: '#F8F9FB', color: '#0f1114' }}
+      >
+        <header className="relative z-20 flex items-center justify-between gap-3 px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-3">
+          <div className="flex min-w-0 items-center gap-2.5" aria-label="Spendrift home">
+            <img
+              src="/images/spendrift-logo.png"
+              alt=""
+              className="h-9 w-auto shrink-0"
+              width={36}
+              height={36}
+            />
+            <span className="truncate text-lg font-black tracking-tight text-neutral-950">
+              Spendrift
             </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-[#6B7AFF]/25 transition active:scale-[0.98]"
+            style={{ background: '#6B7AFF' }}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-marketing-menu"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {mobileMenuOpen ? (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" d="M5 7h14M5 12h14M5 17h14" />
+              </svg>
+            )}
+          </button>
+        </header>
+
+        {mobileMenuOpen && (
+          <div
+            id="mobile-marketing-menu"
+            className="absolute left-0 right-0 top-[calc(3.25rem+env(safe-area-inset-top))] z-30 mx-4 rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xl shadow-neutral-900/10"
+            role="dialog"
+            aria-label="Menu"
+          >
+            <nav className="flex flex-col gap-1 text-[15px] font-medium text-neutral-700">
+              <a
+                href="#mobile-features"
+                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-neutral-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Features
+              </a>
+              <Link
+                href="/privacy_policy"
+                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-neutral-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Privacy
+              </Link>
+              <a
+                href="mailto:me@ronakpunase.dev"
+                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-neutral-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </a>
+            </nav>
+          </div>
+        )}
+
+        <main className="relative z-10 flex w-full max-w-lg flex-1 flex-col px-5 pb-10 pt-2 sm:mx-auto">
+          <div
+            className="mb-5 inline-flex w-fit items-center gap-2 self-center rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-wide text-[#4B55C7]"
+            style={{ background: 'rgba(107, 122, 255, 0.14)', border: '1px solid rgba(107, 122, 255, 0.22)' }}
+          >
+            <span className="text-[13px]" aria-hidden>
+              ★
+            </span>
+            Privacy-first finance
+          </div>
+
+          <h1 className="text-center text-[1.65rem] font-black leading-[1.12] tracking-tight text-neutral-950 sm:text-3xl">
+            Your money, understood.
           </h1>
+          <p className="mx-auto mt-3 max-w-md text-center text-[15px] leading-relaxed text-neutral-600">
+            Built to bring ease in expense tracking. Upload bank statements, speak expenses, or track them without ever opening the app.
+          </p>
 
-          <div className="mt-10">
-            <AppStoreDownloadBadge size="md" className="mx-auto" />
+          <div className="mx-auto mt-7 w-full max-w-[300px]">
+            <div
+              className="rounded-[2.35rem] border border-neutral-200/90 bg-neutral-950 p-[10px] shadow-[0_28px_90px_rgba(15,23,42,0.14)]"
+              aria-label="Spendrift app preview"
+            >
+              <div className="relative aspect-[9/19.2] w-full overflow-hidden rounded-[1.9rem] bg-black">
+                <div
+                  className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-[4.5rem] -translate-x-1/2 rounded-full bg-black/85"
+                  aria-hidden
+                />
+                <MobileHeroVideo />
+              </div>
+            </div>
           </div>
 
-          <div className="mt-8 flex flex-col items-center gap-1">
-            <p className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
-              4.9<span className="text-lg">★</span>
-            </p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              App Store rating
-            </p>
+          <div className="mx-auto mt-8 flex w-full max-w-md flex-col items-stretch gap-3">
+            <a
+              href={SPENDRIFT_APP_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 w-full items-center justify-center rounded-full text-[15px] font-semibold text-white shadow-md shadow-[#6B7AFF]/30 transition active:scale-[0.99]"
+              style={{ background: '#6B7AFF' }}
+            >
+              Get the app
+            </a>
+            <div className="flex justify-center">
+              <AppStoreDownloadBadge size="md" />
+            </div>
           </div>
+
+          <div className="mx-auto mt-8 grid w-full max-w-md grid-cols-3 gap-3 text-center">
+            <div className="rounded-2xl bg-white px-2 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.06)] ring-1 ring-neutral-200/70">
+              <p className="text-lg font-black text-neutral-950">4.9★</p>
+              <p className="mt-0.5 text-[11px] text-neutral-500">App Store</p>
+            </div>
+            <div className="rounded-2xl bg-white px-2 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.06)] ring-1 ring-neutral-200/70">
+              <p className="text-lg font-black text-neutral-950">100%</p>
+              <p className="mt-0.5 text-[11px] text-neutral-500">On-device</p>
+            </div>
+            <div className="rounded-2xl bg-white px-2 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.06)] ring-1 ring-neutral-200/70">
+              <p className="text-lg font-black text-neutral-950">Free</p>
+              <p className="mt-0.5 text-[11px] text-neutral-500">Download</p>
+            </div>
+          </div>
+
+          <section id="mobile-features" className="mt-12 scroll-mt-24">
+            <div
+              className="mb-4 inline-flex w-fit items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-wide text-[#4B55C7]"
+              style={{ background: 'rgba(107, 122, 255, 0.14)', border: '1px solid rgba(107, 122, 255, 0.22)' }}
+            >
+              <span aria-hidden>★</span>
+              Features
+            </div>
+            <h2 className="text-xl font-black tracking-tight text-neutral-950 sm:text-2xl">
+              One place for your spending story
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+              Everything you need to stay organized stays on your iPhone.
+            </p>
+
+            <ul className="mt-6 flex flex-col gap-4">
+              {FEATURES.map((feature, i) => (
+                <li
+                  key={feature.id}
+                  className="rounded-2xl bg-white p-4 shadow-[0_14px_40px_rgba(15,23,42,0.07)] ring-1 ring-neutral-200/80"
+                >
+                  <p className="text-xs font-bold tabular-nums text-[#6B7AFF]">
+                    {String(i + 1).padStart(2, '0')}
+                  </p>
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
+                    {feature.tag}
+                  </p>
+                  <h3 className="mt-2 text-[17px] font-bold leading-snug text-neutral-950">
+                    {feature.headline.replace(/\n/g, ' ')}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">{feature.body}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
         </main>
 
-        <footer
-          className="relative z-10 mt-auto border-t px-6 py-8"
-          style={{ borderColor: 'var(--border)' }}
-        >
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
-            <Link
-              href="/privacy_policy"
-              className="transition-opacity hover:opacity-70"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+        <footer className="relative z-10 border-t border-neutral-200/90 bg-[#F3F4F8] px-5 py-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-neutral-600">
+            <Link href="/privacy_policy" className="transition-colors hover:text-neutral-900">
               Privacy
             </Link>
-            <a
-              href="mailto:me@ronakpunase.dev"
-              className="transition-opacity hover:opacity-70"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+            <a href="mailto:me@ronakpunase.dev" className="transition-colors hover:text-neutral-900">
               Contact
             </a>
           </nav>
-          <p
-            className="mt-4 text-center text-xs tracking-wide"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            Built by Ronak
-          </p>
+          <p className="mt-4 text-center text-xs text-neutral-500">Built by Ronak</p>
         </footer>
       </div>
 
