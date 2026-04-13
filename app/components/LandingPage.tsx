@@ -459,29 +459,51 @@ export default function LandingPage() {
 
   return (
     <div ref={containerRef} style={{ background: 'var(--bg)' }}>
-      {/* Mobile: light marketing layout + device frame — no scroll-driven story */}
-      <div
-        className="relative flex min-h-[100dvh] flex-col lg:hidden"
-        style={{ background: '#F8F9FB', color: '#0f1114' }}
-      >
+      {/* Mobile: dark marketing layout + device frame — same ambience as desktop hero, no scroll story */}
+      <div className="relative flex min-h-[100dvh] flex-col overflow-hidden lg:hidden" style={{ background: 'var(--bg)', color: 'var(--text-primary)' }}>
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+          }}
+        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="absolute rounded-full blur-[100px] opacity-20"
+            style={{ width: 280, height: 280, top: -60, left: '50%', transform: 'translateX(-50%)', background: '#7c6ef5' }}
+          />
+          <div
+            className="absolute rounded-full blur-[90px] opacity-15"
+            style={{ width: 220, height: 220, bottom: 40, right: -40, background: '#5ee7df' }}
+          />
+        </div>
+        <motion.div
+          key={`mobile-hero-ambient-${heroAmbientEpoch}`}
+          className="pointer-events-none absolute inset-0"
+          initial={{ background: heroAmbient.page.backgrounds[0] }}
+          animate={{ background: heroAmbient.page.backgrounds }}
+          transition={{
+            ...heroAmbient.page.transition,
+            delay: heroAmbientIntroDelaySec,
+          }}
+        />
+
         <header className="relative z-20 flex items-center justify-between gap-3 px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-3">
           <div className="flex min-w-0 items-center gap-2.5" aria-label="Spendrift home">
-            <img
-              src="/images/spendrift-logo.png"
-              alt=""
-              className="h-9 w-auto shrink-0"
-              width={36}
-              height={36}
-            />
-            <span className="truncate text-lg font-black tracking-tight text-neutral-950">
+            <SpendriftLogoMark className="h-9 w-auto shrink-0 sm:h-10" />
+            <span className="truncate text-lg font-black tracking-tight" style={{ color: 'var(--text-primary)' }}>
               Spendrift
             </span>
           </div>
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-md shadow-[#6B7AFF]/25 transition active:scale-[0.98]"
-            style={{ background: '#6B7AFF' }}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/12 text-white shadow-lg transition active:scale-[0.98]"
+            style={{
+              background: 'linear-gradient(135deg, rgba(124, 110, 245, 0.95), rgba(94, 231, 223, 0.55))',
+              boxShadow: '0 12px 40px rgba(124, 110, 245, 0.25)',
+            }}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-marketing-menu"
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
@@ -501,28 +523,34 @@ export default function LandingPage() {
         {mobileMenuOpen && (
           <div
             id="mobile-marketing-menu"
-            className="absolute left-0 right-0 top-[calc(3.25rem+env(safe-area-inset-top))] z-30 mx-4 rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-xl shadow-neutral-900/10"
+            className="absolute left-0 right-0 top-[calc(3.25rem+env(safe-area-inset-top))] z-30 mx-4 rounded-2xl border p-4 shadow-xl"
+            style={{
+              background: 'var(--surface-2)',
+              borderColor: 'var(--border)',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.45)',
+            }}
             role="dialog"
             aria-label="Menu"
           >
-            <nav className="flex flex-col gap-1 text-[15px] font-medium text-neutral-700">
+            <nav className="flex flex-col gap-1 text-[15px] font-medium" style={{ color: 'var(--text-secondary)' }}>
               <a
                 href="#mobile-features"
-                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-neutral-100"
+                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
+                style={{ color: 'var(--text-primary)' }}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Features
               </a>
               <Link
                 href="/privacy_policy"
-                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-neutral-100"
+                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Privacy
               </Link>
               <a
                 href="mailto:me@ronakpunase.dev"
-                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-neutral-100"
+                className="rounded-xl px-3 py-2.5 transition-colors hover:bg-white/5"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact
@@ -533,8 +561,12 @@ export default function LandingPage() {
 
         <main className="relative z-10 flex w-full max-w-lg flex-1 flex-col px-5 pb-10 pt-2 sm:mx-auto">
           <div
-            className="mb-5 inline-flex w-fit items-center gap-2 self-center rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-wide text-[#4B55C7]"
-            style={{ background: 'rgba(107, 122, 255, 0.14)', border: '1px solid rgba(107, 122, 255, 0.22)' }}
+            className="mb-5 inline-flex w-fit items-center gap-2 self-center rounded-full border px-3.5 py-1.5 text-xs font-semibold tracking-wide"
+            style={{
+              background: 'rgba(124, 110, 245, 0.12)',
+              borderColor: 'rgba(124, 110, 245, 0.25)',
+              color: '#a89ff7',
+            }}
           >
             <span className="text-[13px]" aria-hidden>
               ★
@@ -542,21 +574,31 @@ export default function LandingPage() {
             Privacy-first finance
           </div>
 
-          <h1 className="text-center text-[1.65rem] font-black leading-[1.12] tracking-tight text-neutral-950 sm:text-3xl">
-            Your money, understood.
+          <h1 className="text-center text-[1.65rem] font-black leading-[1.12] tracking-tight sm:text-3xl" style={{ color: 'var(--text-primary)' }}>
+            Your money,{' '}
+            <span
+              className="bg-gradient-to-br from-[#7c6ef5] to-[#5ee7df] bg-clip-text text-transparent"
+            >
+              understood.
+            </span>
           </h1>
-          <p className="mx-auto mt-3 max-w-md text-center text-[15px] leading-relaxed text-neutral-600">
+          <p className="mx-auto mt-3 max-w-md text-center text-[15px] leading-relaxed" style={{ color: 'var(--text-secondary)', opacity: 0.88 }}>
             Built to bring ease in expense tracking. Upload bank statements, speak expenses, or track them without ever opening the app.
           </p>
 
           <div className="mx-auto mt-7 w-full max-w-[300px]">
             <div
-              className="rounded-[2.35rem] border border-neutral-200/90 bg-neutral-950 p-[10px] shadow-[0_28px_90px_rgba(15,23,42,0.14)]"
+              className="rounded-[2.35rem] p-[10px]"
+              style={{
+                background: 'var(--phone-bg)',
+                border: '1.5px solid rgba(255,255,255,0.12)',
+                boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)',
+              }}
               aria-label="Spendrift app preview"
             >
               <div className="relative aspect-[9/19.2] w-full overflow-hidden rounded-[1.9rem] bg-black">
                 <div
-                  className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-[4.5rem] -translate-x-1/2 rounded-full bg-black/85"
+                  className="pointer-events-none absolute left-1/2 top-2.5 z-10 h-5 w-[4.5rem] -translate-x-1/2 rounded-full bg-black"
                   aria-hidden
                 />
                 <MobileHeroVideo />
@@ -569,8 +611,11 @@ export default function LandingPage() {
               href={SPENDRIFT_APP_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-12 w-full items-center justify-center rounded-full text-[15px] font-semibold text-white shadow-md shadow-[#6B7AFF]/30 transition active:scale-[0.99]"
-              style={{ background: '#6B7AFF' }}
+              className="inline-flex h-12 w-full items-center justify-center rounded-full text-[15px] font-semibold text-white transition active:scale-[0.99]"
+              style={{
+                background: 'linear-gradient(135deg, #7c6ef5, #6b5fd4)',
+                boxShadow: '0 14px 44px rgba(124, 110, 245, 0.35)',
+              }}
             >
               Get the app
             </a>
@@ -580,32 +625,45 @@ export default function LandingPage() {
           </div>
 
           <div className="mx-auto mt-8 grid w-full max-w-md grid-cols-3 gap-3 text-center">
-            <div className="rounded-2xl bg-white px-2 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.06)] ring-1 ring-neutral-200/70">
-              <p className="text-lg font-black text-neutral-950">4.9★</p>
-              <p className="mt-0.5 text-[11px] text-neutral-500">App Store</p>
+            <div
+              className="rounded-2xl px-2 py-3"
+              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+            >
+              <p className="text-lg font-black" style={{ color: 'var(--text-primary)' }}>4.9★</p>
+              <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-muted)' }}>App Store</p>
             </div>
-            <div className="rounded-2xl bg-white px-2 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.06)] ring-1 ring-neutral-200/70">
-              <p className="text-lg font-black text-neutral-950">100%</p>
-              <p className="mt-0.5 text-[11px] text-neutral-500">On-device</p>
+            <div
+              className="rounded-2xl px-2 py-3"
+              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+            >
+              <p className="text-lg font-black" style={{ color: 'var(--text-primary)' }}>100%</p>
+              <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-muted)' }}>On-device</p>
             </div>
-            <div className="rounded-2xl bg-white px-2 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.06)] ring-1 ring-neutral-200/70">
-              <p className="text-lg font-black text-neutral-950">Free</p>
-              <p className="mt-0.5 text-[11px] text-neutral-500">Download</p>
+            <div
+              className="rounded-2xl px-2 py-3"
+              style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}
+            >
+              <p className="text-lg font-black" style={{ color: 'var(--text-primary)' }}>Free</p>
+              <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-muted)' }}>Download</p>
             </div>
           </div>
 
           <section id="mobile-features" className="mt-12 scroll-mt-24">
             <div
-              className="mb-4 inline-flex w-fit items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-wide text-[#4B55C7]"
-              style={{ background: 'rgba(107, 122, 255, 0.14)', border: '1px solid rgba(107, 122, 255, 0.22)' }}
+              className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold tracking-wide"
+              style={{
+                background: 'rgba(124, 110, 245, 0.12)',
+                borderColor: 'rgba(124, 110, 245, 0.25)',
+                color: '#a89ff7',
+              }}
             >
               <span aria-hidden>★</span>
               Features
             </div>
-            <h2 className="text-xl font-black tracking-tight text-neutral-950 sm:text-2xl">
+            <h2 className="text-xl font-black tracking-tight sm:text-2xl" style={{ color: 'var(--text-primary)' }}>
               One place for your spending story
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
+            <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)', opacity: 0.88 }}>
               Everything you need to stay organized stays on your iPhone.
             </p>
 
@@ -613,34 +671,44 @@ export default function LandingPage() {
               {FEATURES.map((feature, i) => (
                 <li
                   key={feature.id}
-                  className="rounded-2xl bg-white p-4 shadow-[0_14px_40px_rgba(15,23,42,0.07)] ring-1 ring-neutral-200/80"
+                  className="rounded-2xl p-4"
+                  style={{
+                    background: 'var(--surface-2)',
+                    border: '1px solid var(--border)',
+                    boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
+                  }}
                 >
-                  <p className="text-xs font-bold tabular-nums text-[#6B7AFF]">
+                  <p className="text-xs font-bold tabular-nums" style={{ color: '#7c6ef5' }}>
                     {String(i + 1).padStart(2, '0')}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
                     {feature.tag}
                   </p>
-                  <h3 className="mt-2 text-[17px] font-bold leading-snug text-neutral-950">
+                  <h3 className="mt-2 text-[17px] font-bold leading-snug" style={{ color: 'var(--text-primary)' }}>
                     {feature.headline.replace(/\n/g, ' ')}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-neutral-600">{feature.body}</p>
+                  <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)', opacity: 0.88 }}>{feature.body}</p>
                 </li>
               ))}
             </ul>
           </section>
         </main>
 
-        <footer className="relative z-10 border-t border-neutral-200/90 bg-[#F3F4F8] px-5 py-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-neutral-600">
-            <Link href="/privacy_policy" className="transition-colors hover:text-neutral-900">
+        <footer
+          className="relative z-10 border-t px-5 py-8 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+          style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+        >
+          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <Link href="/privacy_policy" className="transition-opacity hover:opacity-70">
               Privacy
             </Link>
-            <a href="mailto:me@ronakpunase.dev" className="transition-colors hover:text-neutral-900">
+            <a href="mailto:me@ronakpunase.dev" className="transition-opacity hover:opacity-70">
               Contact
             </a>
           </nav>
-          <p className="mt-4 text-center text-xs text-neutral-500">Built by Ronak</p>
+          <p className="mt-4 text-center text-xs tracking-wide" style={{ color: 'var(--text-muted)' }}>
+            Built by Ronak
+          </p>
         </footer>
       </div>
 
