@@ -2,8 +2,28 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Spendrift Privacy Policy",
-  description: "Privacy Policy for the Spendrift mobile application.",
+  title: "Privacy Policy",
+  description:
+    "Read how Spendrift handles your data: on-device expense storage, optional AI-assisted import and voice entry, iCloud backups, and contact Ronak Punase for questions.",
+  keywords: [
+    "Spendrift privacy policy",
+    "Spendrift data",
+    "on-device expense tracker privacy",
+    "Ronak Punase",
+  ],
+  alternates: { canonical: "/privacy_policy" },
+  openGraph: {
+    title: "Spendrift Privacy Policy",
+    description:
+      "How Spendrift stores finances on your device, uses optional AI features, and how to contact the developer.",
+    url: "/privacy_policy",
+  },
+  twitter: {
+    card: "summary",
+    title: "Spendrift Privacy Policy",
+    description:
+      "How Spendrift stores finances on your device, uses optional AI features, and how to contact the developer.",
+  },
 };
 
 const sections = [
